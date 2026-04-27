@@ -9,4 +9,6 @@ pub struct Order {
     pub order_date: String,
     pub amount: i64,
     pub gross_profit: i64,
+    pub project_name: String,
+    pub client_name: String,
 }

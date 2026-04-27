@@ -1,0 +1,148 @@
+/* ── Design tokens ───────────────────────────── */
+:root {
+  --clr-brand:          #4f46e5;
+  --clr-brand-hover:    #4338ca;
+  --clr-brand-light:    #eef2ff;
+  --clr-brand-ring:     rgba(99, 102, 241, 0.18);
+
+  --clr-success:        #16a34a;
+  --clr-success-hover:  #15803d;
+  --clr-success-bg:     #f0fdf4;
+  --clr-success-border: #bbf7d0;
+
+  --clr-danger:         #dc2626;
+  --clr-danger-hover:   #b91c1c;
+  --clr-danger-bg:      #fef2f2;
+  --clr-danger-border:  #fecaca;
+
+  --clr-secondary:      #475569;
+  --clr-secondary-hover:#334155;
+
+  --clr-bg:             #f1f5f9;
+  --clr-surface:        #ffffff;
+  --clr-border:         #e2e8f0;
+
+  --clr-text:           #0f172a;
+  --clr-text-2:         #475569;
+  --clr-text-3:         #94a3b8;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07),
+               0 2px 4px -2px rgba(0, 0, 0, 0.05);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --transition: 150ms ease;
+}
+
+/* ── Reset ───────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ────────────────────────────────────── */
+body {
+  font-family: "Yu Gothic UI", "Meiryo UI", "Meiryo", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--clr-text);
+  background: var(--clr-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typography ──────────────────────────────── */
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--clr-text);
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--clr-text);
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--clr-text-2);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Input base (global) ─────────────────────── */
+input[type="text"],
+input[type="number"],
+input[type="month"] {
+  padding: 7px 11px;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--clr-text);
+  background: var(--clr-surface);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="month"]:focus {
+  border-color: var(--clr-brand);
+  box-shadow: 0 0 0 3px var(--clr-brand-ring);
+}
+
+/* ── Table element styles (global) ───────────── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  padding: 6px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--clr-border);
+  white-space: nowrap;
+}
+
+th {
+  background: #f8fafc;
+  color: var(--clr-text-2);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 2px solid var(--clr-border);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover td {
+  background: #f8fafc;
+}
+
+tfoot td {
+  background: var(--clr-brand-light);
+  color: var(--clr-brand);
+  font-weight: 700;
+  position: sticky;
+  bottom: 0;
+  border-top: 2px solid #c7d2fe;
+  border-bottom: none;
+}

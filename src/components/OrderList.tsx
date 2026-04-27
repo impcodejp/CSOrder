@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import ui from "../styles/ui.module.css";
 
 interface Order {
   id: number;
-  cs_name: string;
+  csName: string;
   amount: number;
-  gross_profit: number;
-  project_name: string;
-  client_name: string;
-  order_date: string;
+  grossProfit: number;
+  projectName: string;
+  clientName: string;
+  orderDate: string;
 }
 
 const fmt = (n: number) => n.toLocaleString("ja-JP");
@@ -25,7 +26,7 @@ export default function OrderList() {
     setError("");
     try {
       const rows = await invoke<Order[]>("get_orders", {
-        staffName: staffFilter || null,
+        csName: staffFilter || null,
         clientName: clientFilter || null,
       });
       setOrders(rows);
@@ -42,8 +43,8 @@ export default function OrderList() {
     <div>
       <h2>受注一覧</h2>
 
-      <div className="card">
-        <div className="filter-row">
+      <div className={ui.card}>
+        <div className={ui.filterRow}>
           <label>
             受注者
             <input
@@ -62,21 +63,20 @@ export default function OrderList() {
               placeholder="絞り込み..."
             />
           </label>
-          <button className="btn btn-secondary" onClick={load} disabled={loading}>
+          <button className={`${ui.btn} ${ui.btnSecondary}`} onClick={load} disabled={loading}>
             再読み込み
           </button>
         </div>
 
-        {error && <p className="msg-error">{error}</p>}
+        {error && <p className={ui.msgError}>{error}</p>}
+        {loading && <p className={ui.msgInfo}>読み込み中...</p>}
 
-        {loading ? (
-          <p className="msg-info">読み込み中...</p>
-        ) : (
+        {!loading && (
           <>
-            <p style={{ fontSize: 13, color: "#666", marginBottom: 10 }}>
-              {orders.length}件
+            <p style={{ fontSize: 12, color: "var(--clr-text-3)", marginBottom: 12 }}>
+              {orders.length} 件
             </p>
-            <div className="table-wrap">
+            <div className={ui.tableWrap}>
               <table>
                 <thead>
                   <tr>
@@ -84,24 +84,24 @@ export default function OrderList() {
                     <th>受注者名</th>
                     <th>顧客名</th>
                     <th>案件名</th>
-                    <th className="num">金額（円）</th>
-                    <th className="num">粗利（円）</th>
+                    <th className={ui.num}>金額（円）</th>
+                    <th className={ui.num}>粗利（円）</th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.length === 0 ? (
-                    <tr className="empty-row">
+                    <tr className={ui.emptyRow}>
                       <td colSpan={6}>データがありません</td>
                     </tr>
                   ) : (
                     orders.map((o) => (
                       <tr key={o.id}>
-                        <td>{o.order_date}</td>
-                        <td>{o.cs_name}</td>
-                        <td>{o.client_name}</td>
-                        <td>{o.project_name}</td>
-                        <td className="num">{fmt(o.amount)}</td>
-                        <td className="num">{fmt(o.gross_profit)}</td>
+                        <td>{o.orderDate}</td>
+                        <td>{o.csName}</td>
+                        <td>{o.clientName}</td>
+                        <td>{o.projectName}</td>
+                        <td className={ui.num}>{fmt(o.amount)}</td>
+                        <td className={ui.num}>{fmt(o.grossProfit)}</td>
                       </tr>
                     ))
                   )}

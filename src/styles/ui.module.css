@@ -1,0 +1,280 @@
+/* ── カード ─────────────────────────────────── */
+.card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 20px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* ── ボタン ─────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition: background var(--transition), border-color var(--transition),
+              color var(--transition), box-shadow var(--transition);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--clr-brand);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Primary */
+.btnPrimary {
+  background: var(--clr-brand);
+  color: #ffffff;
+  border-color: var(--clr-brand);
+}
+.btnPrimary:not(:disabled):hover {
+  background: var(--clr-brand-hover);
+  border-color: var(--clr-brand-hover);
+}
+
+/* Secondary — outline */
+.btnSecondary {
+  background: var(--clr-surface);
+  color: var(--clr-secondary);
+  border-color: var(--clr-border);
+}
+.btnSecondary:not(:disabled):hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: var(--clr-secondary-hover);
+}
+
+/* Success */
+.btnSuccess {
+  background: var(--clr-success);
+  color: #ffffff;
+  border-color: var(--clr-success);
+}
+.btnSuccess:not(:disabled):hover {
+  background: var(--clr-success-hover);
+  border-color: var(--clr-success-hover);
+}
+
+/* Danger */
+.btnDanger {
+  background: transparent;
+  color: var(--clr-danger);
+  border-color: #fca5a5;
+}
+.btnDanger:not(:disabled):hover {
+  background: var(--clr-danger-bg);
+  border-color: var(--clr-danger);
+}
+
+/* ── ツールバー ─────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── テーブルラッパー ───────────────────────── */
+.tableWrap {
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  overflow-x: auto;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+/* ── レポート専用：縦いっぱいに広がるレイアウト ─ */
+.reportPage {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px); /* mainContent padding 32px × 2 */
+}
+
+.reportTableWrap {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  overflow: auto;
+}
+
+.num { text-align: right; }
+
+.emptyRow td {
+  text-align: center;
+  color: var(--clr-text-3);
+  padding: 40px 24px;
+  font-size: 13px;
+}
+
+/* ── 小計行 ─────────────────────────────────── */
+.subtotalRow td {
+  background: #e8edf5;
+  font-weight: 600;
+  border-top: 2px solid #c9d5e8;
+  border-bottom: 2px solid #c9d5e8;
+}
+
+/* ── フィルター行 ────────────────────────────── */
+.filterRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+}
+
+.filterRow label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--clr-text-2);
+}
+
+.filterRow input {
+  width: 160px;
+}
+
+/* ── タブ ────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--clr-border);
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 9px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--clr-text-3);
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.tab:hover {
+  color: var(--clr-text-2);
+}
+
+.tabActive {
+  color: var(--clr-brand);
+  border-bottom-color: var(--clr-brand);
+}
+
+/* ── フィルターバー（Report用） ─────────────── */
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.filterBar label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--clr-text-2);
+}
+
+.filterBar span {
+  font-size: 12px;
+  color: var(--clr-text-3);
+}
+
+.filterSep {
+  color: var(--clr-text-3);
+  font-size: 13px;
+}
+
+/* ── メッセージ ─────────────────────────────── */
+.msgError {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--clr-danger-bg);
+  border: 1px solid var(--clr-danger-border);
+  border-left: 3px solid var(--clr-danger);
+  border-radius: var(--radius-sm);
+  color: var(--clr-danger);
+  font-size: 13px;
+}
+
+.msgSuccess {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--clr-success-bg);
+  border: 1px solid var(--clr-success-border);
+  border-left: 3px solid var(--clr-success);
+  border-radius: var(--radius-sm);
+  color: var(--clr-success);
+  font-size: 13px;
+}
+
+.msgInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--clr-brand-light);
+  border: 1px solid #c7d2fe;
+  border-left: 3px solid var(--clr-brand);
+  border-radius: var(--radius-sm);
+  color: var(--clr-brand);
+  font-size: 13px;
+}
+
+/* ── 達成率バッジ ────────────────────────────── */
+.rateHigh {
+  color: var(--clr-success);
+  font-weight: 600;
+}
+
+.rateLow {
+  color: var(--clr-danger);
+  font-weight: 600;
+}

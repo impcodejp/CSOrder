@@ -1,12 +1,13 @@
 import { useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import ui from "../styles/ui.module.css";
 
 interface OrderPreview {
-  staff_name: string;
+  csName: string;
   amount: number;
-  gross_profit: number;
-  project_name: string;
-  client_name: string;
+  grossProfit: number;
+  projectName: string;
+  clientName: string;
 }
 
 const fmt = (n: number) => n.toLocaleString("ja-JP");
@@ -65,9 +66,9 @@ export default function DataImport() {
     <div>
       <h2>データ取込</h2>
 
-      <div className="card">
+      <div className={ui.card}>
         <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
-          <label className="btn btn-primary" style={{ cursor: "pointer" }}>
+          <label className={`${ui.btn} ${ui.btnPrimary}`} style={{ cursor: "pointer" }}>
             CSVファイルを選択
             <input
               ref={inputRef}
@@ -87,13 +88,13 @@ export default function DataImport() {
             <p style={{ fontSize: 13, color: "#666", marginBottom: 10 }}>
               プレビュー（{preview.length}件）― 内容を確認してからインポートを実行してください
             </p>
-            <div className="table-wrap" style={{ marginBottom: 16 }}>
+            <div className={ui.tableWrap} style={{ marginBottom: 16 }}>
               <table>
                 <thead>
                   <tr>
                     <th>受注者名</th>
-                    <th className="num">金額（円）</th>
-                    <th className="num">粗利（円）</th>
+                    <th className={ui.num}>金額（円）</th>
+                    <th className={ui.num}>粗利（円）</th>
                     <th>案件名</th>
                     <th>顧客名</th>
                   </tr>
@@ -101,28 +102,28 @@ export default function DataImport() {
                 <tbody>
                   {preview.map((row, i) => (
                     <tr key={i}>
-                      <td>{row.staff_name}</td>
-                      <td className="num">{fmt(row.amount)}</td>
-                      <td className="num">{fmt(row.gross_profit)}</td>
-                      <td>{row.project_name}</td>
-                      <td>{row.client_name}</td>
+                      <td>{row.csName}</td>
+                      <td className={ui.num}>{fmt(row.amount)}</td>
+                      <td className={ui.num}>{fmt(row.grossProfit)}</td>
+                      <td>{row.projectName}</td>
+                      <td>{row.clientName}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <button className="btn btn-success" onClick={handleImport} disabled={loading}>
+            <button className={`${ui.btn} ${ui.btnSuccess}`} onClick={handleImport} disabled={loading}>
               インポート実行
             </button>
           </>
         )}
 
         {message && (
-          <p className={message.type === "error" ? "msg-error" : "msg-success"}>
+          <p className={message.type === "error" ? ui.msgError : ui.msgSuccess}>
             {message.text}
           </p>
         )}
-        {loading && <p className="msg-info">処理中...</p>}
+        {loading && <p className={ui.msgInfo}>処理中...</p>}
       </div>
     </div>
   );

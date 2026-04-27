@@ -2,24 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import ui from "../styles/ui.module.css";
 
 interface Employee {
   id: number;
   name: string;
   group: string;
   grade: string;
-  monthly_budget1: number;
-  monthly_budget2: number;
-  monthly_budget3: number;
-  monthly_budget4: number;
-  monthly_budget5: number;
-  monthly_budget6: number;
-  monthly_budget7: number;
-  monthly_budget8: number;
-  monthly_budget9: number;
-  monthly_budget10: number;
-  monthly_budget11: number;
-  monthly_budget12: number;
+  monthlyBudget1: number;
+  monthlyBudget2: number;
+  monthlyBudget3: number;
+  monthlyBudget4: number;
+  monthlyBudget5: number;
+  monthlyBudget6: number;
+  monthlyBudget7: number;
+  monthlyBudget8: number;
+  monthlyBudget9: number;
+  monthlyBudget10: number;
+  monthlyBudget11: number;
+  monthlyBudget12: number;
 }
 
 interface Row {
@@ -27,27 +28,27 @@ interface Row {
   name: string;
   group: string;
   grade: string;
-  monthly_budget1: number;
-  monthly_budget2: number;
-  monthly_budget3: number;
-  monthly_budget4: number;
-  monthly_budget5: number;
-  monthly_budget6: number;
-  monthly_budget7: number;
-  monthly_budget8: number;
-  monthly_budget9: number;
-  monthly_budget10: number;
-  monthly_budget11: number;
-  monthly_budget12: number;
+  monthlyBudget1: number;
+  monthlyBudget2: number;
+  monthlyBudget3: number;
+  monthlyBudget4: number;
+  monthlyBudget5: number;
+  monthlyBudget6: number;
+  monthlyBudget7: number;
+  monthlyBudget8: number;
+  monthlyBudget9: number;
+  monthlyBudget10: number;
+  monthlyBudget11: number;
+  monthlyBudget12: number;
 }
 
 // 表示ラベル: 会計年度順（4月〜3月）
 const MONTH_ORDER = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3] as const;
-// フィールド: monthly_budget1=4月, monthly_budget2=5月, ..., monthly_budget12=3月
+// フィールド: monthlyBudget1=4月, monthlyBudget2=5月, ..., monthlyBudget12=3月
 const BUDGET_FIELDS = [
-  "monthly_budget1", "monthly_budget2", "monthly_budget3", "monthly_budget4",
-  "monthly_budget5", "monthly_budget6", "monthly_budget7", "monthly_budget8",
-  "monthly_budget9", "monthly_budget10", "monthly_budget11", "monthly_budget12",
+  "monthlyBudget1", "monthlyBudget2", "monthlyBudget3", "monthlyBudget4",
+  "monthlyBudget5", "monthlyBudget6", "monthlyBudget7", "monthlyBudget8",
+  "monthlyBudget9", "monthlyBudget10", "monthlyBudget11", "monthlyBudget12",
 ] as const satisfies (keyof Row)[];
 
 let nextTempId = 0;
@@ -56,10 +57,10 @@ function emptyRow(): Row {
   return {
     tempId: nextTempId++,
     name: "", group: "", grade: "",
-    monthly_budget1: 0, monthly_budget2: 0, monthly_budget3: 0,
-    monthly_budget4: 0, monthly_budget5: 0, monthly_budget6: 0,
-    monthly_budget7: 0, monthly_budget8: 0, monthly_budget9: 0,
-    monthly_budget10: 0, monthly_budget11: 0, monthly_budget12: 0,
+    monthlyBudget1: 0, monthlyBudget2: 0, monthlyBudget3: 0,
+    monthlyBudget4: 0, monthlyBudget5: 0, monthlyBudget6: 0,
+    monthlyBudget7: 0, monthlyBudget8: 0, monthlyBudget9: 0,
+    monthlyBudget10: 0, monthlyBudget11: 0, monthlyBudget12: 0,
   };
 }
 
@@ -67,12 +68,12 @@ function employeeToRow(e: Employee): Row {
   return {
     tempId: nextTempId++,
     name: e.name, group: e.group, grade: e.grade,
-    monthly_budget1: e.monthly_budget1, monthly_budget2: e.monthly_budget2,
-    monthly_budget3: e.monthly_budget3, monthly_budget4: e.monthly_budget4,
-    monthly_budget5: e.monthly_budget5, monthly_budget6: e.monthly_budget6,
-    monthly_budget7: e.monthly_budget7, monthly_budget8: e.monthly_budget8,
-    monthly_budget9: e.monthly_budget9, monthly_budget10: e.monthly_budget10,
-    monthly_budget11: e.monthly_budget11, monthly_budget12: e.monthly_budget12,
+    monthlyBudget1: e.monthlyBudget1, monthlyBudget2: e.monthlyBudget2,
+    monthlyBudget3: e.monthlyBudget3, monthlyBudget4: e.monthlyBudget4,
+    monthlyBudget5: e.monthlyBudget5, monthlyBudget6: e.monthlyBudget6,
+    monthlyBudget7: e.monthlyBudget7, monthlyBudget8: e.monthlyBudget8,
+    monthlyBudget9: e.monthlyBudget9, monthlyBudget10: e.monthlyBudget10,
+    monthlyBudget11: e.monthlyBudget11, monthlyBudget12: e.monthlyBudget12,
   };
 }
 
@@ -85,8 +86,7 @@ async function downloadCSVTemplate() {
     filters: [{ name: "CSV", extensions: ["csv"] }],
   });
   if (!path) return;
-  const bom = "\uFEFF";
-  await writeTextFile(path, bom + CSV_HEADER + "\n");
+  await writeTextFile(path, "\uFEFF" + CSV_HEADER + "\n");
 }
 
 async function exportCSV(rows: Row[]) {
@@ -95,17 +95,15 @@ async function exportCSV(rows: Row[]) {
     filters: [{ name: "CSV", extensions: ["csv"] }],
   });
   if (!path) return;
-  const bom = "\uFEFF";
   const lines = rows.map((r) =>
     [r.name, r.group, r.grade, ...BUDGET_FIELDS.map((f) => r[f])].join(",")
   );
-  await writeTextFile(path, bom + CSV_HEADER + "\n" + lines.join("\n") + "\n");
+  await writeTextFile(path, "\uFEFF" + CSV_HEADER + "\n" + lines.join("\n") + "\n");
 }
 
 function parseCSV(rawText: string): { rows: Row[]; error: string | null } {
-  const text = rawText.replace(/^\uFEFF/, ""); // BOM除去
+  const text = rawText.replace(/^\uFEFF/, "");
   const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");
-  // ヘッダー行をスキップ（1列目が「社員名」の場合）
   const dataLines = lines[0]?.split(",")[0].trim() === "社員名" ? lines.slice(1) : lines;
   const rows: Row[] = [];
   for (let i = 0; i < dataLines.length; i++) {
@@ -118,10 +116,7 @@ function parseCSV(rawText: string): { rows: Row[]; error: string | null } {
       return { rows: [], error: `${i + 1}行目: 社員名・グループ・グレードは必須です` };
     }
     const row = emptyRow();
-    row.name = name;
-    row.group = group;
-    row.grade = grade;
-    // budgets列はMONTH_ORDER順（4,5,...,3）で対応
+    row.name = name; row.group = group; row.grade = grade;
     BUDGET_FIELDS.forEach((field, idx) => {
       row[field] = budgets[idx] ? (Number(budgets[idx]) || 0) : 0;
     });
@@ -197,18 +192,12 @@ export default function EmployeeManagement() {
           name: r.name.trim(),
           group: r.group.trim(),
           grade: r.grade.trim(),
-          monthly_budget1: r.monthly_budget1,
-          monthly_budget2: r.monthly_budget2,
-          monthly_budget3: r.monthly_budget3,
-          monthly_budget4: r.monthly_budget4,
-          monthly_budget5: r.monthly_budget5,
-          monthly_budget6: r.monthly_budget6,
-          monthly_budget7: r.monthly_budget7,
-          monthly_budget8: r.monthly_budget8,
-          monthly_budget9: r.monthly_budget9,
-          monthly_budget10: r.monthly_budget10,
-          monthly_budget11: r.monthly_budget11,
-          monthly_budget12: r.monthly_budget12,
+          monthlyBudget1:  r.monthlyBudget1,  monthlyBudget2:  r.monthlyBudget2,
+          monthlyBudget3:  r.monthlyBudget3,  monthlyBudget4:  r.monthlyBudget4,
+          monthlyBudget5:  r.monthlyBudget5,  monthlyBudget6:  r.monthlyBudget6,
+          monthlyBudget7:  r.monthlyBudget7,  monthlyBudget8:  r.monthlyBudget8,
+          monthlyBudget9:  r.monthlyBudget9,  monthlyBudget10: r.monthlyBudget10,
+          monthlyBudget11: r.monthlyBudget11, monthlyBudget12: r.monthlyBudget12,
         })),
       });
       setMessage({ type: "success", text: "更新しました。" });
@@ -224,10 +213,10 @@ export default function EmployeeManagement() {
     <div>
       <h2>社員管理</h2>
 
-      <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <div className={ui.card}>
+        <div className={ui.cardHeader}>
           <h3 style={{ margin: 0 }}>社員一覧</h3>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className={ui.toolbar}>
             <input
               ref={fileInputRef}
               type="file"
@@ -235,31 +224,31 @@ export default function EmployeeManagement() {
               style={{ display: "none" }}
               onChange={handleCSVImport}
             />
-            <button className="btn btn-secondary" onClick={() => downloadCSVTemplate()}>
+            <button className={`${ui.btn} ${ui.btnSecondary}`} onClick={() => downloadCSVTemplate()}>
               レイアウト出力
             </button>
-            <button className="btn btn-secondary" onClick={() => exportCSV(rows)}>
+            <button className={`${ui.btn} ${ui.btnSecondary}`} onClick={() => exportCSV(rows)}>
               CSV出力
             </button>
-            <button className="btn btn-secondary" onClick={() => fileInputRef.current?.click()}>
+            <button className={`${ui.btn} ${ui.btnSecondary}`} onClick={() => fileInputRef.current?.click()}>
               CSV取込
             </button>
-            <button className="btn btn-secondary" onClick={addRow}>
+            <button className={`${ui.btn} ${ui.btnSecondary}`} onClick={addRow}>
               ＋ 行追加
             </button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            <button className={`${ui.btn} ${ui.btnPrimary}`} onClick={handleSave} disabled={saving}>
               {saving ? "更新中..." : "更新"}
             </button>
           </div>
         </div>
 
         {message && (
-          <p className={message.type === "error" ? "msg-error" : "msg-success"} style={{ marginBottom: 8 }}>
+          <p className={message.type === "error" ? ui.msgError : ui.msgSuccess} style={{ marginBottom: 12 }}>
             {message.text}
           </p>
         )}
 
-        <div style={{ overflowX: "auto" }}>
+        <div className={ui.tableWrap}>
           <table style={{ minWidth: 1400 }}>
             <thead>
               <tr>
@@ -267,14 +256,14 @@ export default function EmployeeManagement() {
                 <th>グループ</th>
                 <th>グレード</th>
                 {MONTH_ORDER.map((m, i) => (
-                  <th key={i} style={{ minWidth: 80 }}>{m}月予算</th>
+                  <th key={i} className={ui.num} style={{ minWidth: 90 }}>{m}月予算</th>
                 ))}
                 <th style={{ width: 60 }}></th>
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 ? (
-                <tr className="empty-row">
+                <tr className={ui.emptyRow}>
                   <td colSpan={16}>社員が登録されていません</td>
                 </tr>
               ) : (
@@ -287,7 +276,7 @@ export default function EmployeeManagement() {
                         value={row.name}
                         onChange={(e) => updateText(row.tempId, "name", e.target.value)}
                         placeholder="山田 太郎"
-                        style={{ width: "100%", boxSizing: "border-box" }}
+                        style={{ width: "100%" }}
                       />
                     </td>
                     <td>
@@ -296,7 +285,7 @@ export default function EmployeeManagement() {
                         value={row.group}
                         onChange={(e) => updateText(row.tempId, "group", e.target.value)}
                         placeholder="営業1部"
-                        style={{ width: "100%", boxSizing: "border-box" }}
+                        style={{ width: "100%" }}
                       />
                     </td>
                     <td>
@@ -305,7 +294,7 @@ export default function EmployeeManagement() {
                         value={row.grade}
                         onChange={(e) => updateText(row.tempId, "grade", e.target.value)}
                         placeholder="A"
-                        style={{ width: "100%", boxSizing: "border-box" }}
+                        style={{ width: "100%" }}
                       />
                     </td>
                     {BUDGET_FIELDS.map((field) => (
@@ -314,13 +303,13 @@ export default function EmployeeManagement() {
                           type="number"
                           value={row[field]}
                           onChange={(e) => updateBudget(row.tempId, field, e.target.value)}
-                          style={{ width: "100%", boxSizing: "border-box" }}
+                          style={{ width: "100%", textAlign: "right" }}
                         />
                       </td>
                     ))}
                     <td style={{ textAlign: "center" }}>
                       <button
-                        className="btn btn-danger"
+                        className={`${ui.btn} ${ui.btnDanger}`}
                         style={{ padding: "4px 10px", fontSize: 12 }}
                         onClick={() => deleteRow(row.tempId)}
                       >
