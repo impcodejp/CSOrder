@@ -40,6 +40,10 @@ pub fn run() {
             command::employee_command::get_employees,
             command::employee_command::update_employees,
             command::order_command::get_orders,
+            command::report_command::get_report,
+            command::csv_import_command::preview_csv,
+            command::csv_import_command::validate_csv,
+            command::csv_import_command::import_orders,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

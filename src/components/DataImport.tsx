@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import ui from "../styles/ui.module.css";
 
 interface OrderPreview {
@@ -13,28 +14,29 @@ interface OrderPreview {
 const fmt = (n: number) => n.toLocaleString("ja-JP");
 
 export default function DataImport() {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [filePath, setFilePath] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
   const [preview, setPreview] = useState<OrderPreview[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function handleSelectFile() {
+    const selected = await open({
+      multiple: false,
+      filters: [{ name: "CSV", extensions: ["csv"] }],
+    });
+    if (!selected) return;
 
-    // Tauri の webview は File オブジェクトに path プロパティを付与する
-    const path = (file as File & { path: string }).path;
+    const path = selected as string;
+    const name = path.split(/[\\/]/).pop() ?? path;
 
     setFilePath(path);
-    setFileName(file.name);
+    setFileName(name);
     setPreview([]);
     setMessage(null);
 
     try {
       setLoading(true);
-      // バリデーション・パースはバックエンドで実施
       const rows = await invoke<OrderPreview[]>("preview_csv", { path });
       setPreview(rows);
     } catch (err) {
@@ -54,7 +56,6 @@ export default function DataImport() {
       setPreview([]);
       setFilePath(null);
       setFileName("");
-      if (inputRef.current) inputRef.current.value = "";
     } catch (err) {
       setMessage({ type: "error", text: String(err) });
     } finally {
@@ -68,16 +69,13 @@ export default function DataImport() {
 
       <div className={ui.card}>
         <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
-          <label className={`${ui.btn} ${ui.btnPrimary}`} style={{ cursor: "pointer" }}>
+          <button
+            className={`${ui.btn} ${ui.btnPrimary}`}
+            onClick={handleSelectFile}
+            disabled={loading}
+          >
             CSVファイルを選択
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".csv"
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-          </label>
+          </button>
           {fileName && (
             <span style={{ fontSize: 13, color: "#555" }}>{fileName}</span>
           )}
@@ -112,10 +110,17 @@ export default function DataImport() {
                 </tbody>
               </table>
             </div>
-            <button className={`${ui.btn} ${ui.btnSuccess}`} onClick={handleImport} disabled={loading}>
-              インポート実行
-            </button>
           </>
+        )}
+
+        {filePath && (
+          <button
+            className={`${ui.btn} ${ui.btnSuccess}`}
+            onClick={handleImport}
+            disabled={loading || preview.length === 0}
+          >
+            インポート実行
+          </button>
         )}
 
         {message && (

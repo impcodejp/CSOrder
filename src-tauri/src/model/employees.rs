@@ -5,6 +5,7 @@ use sqlx::FromRow;
 #[serde(rename_all = "camelCase")]
 pub struct Employee {
     pub id: i64,
+    pub employee_code: i64,
     pub name: String,
     pub group: String,
     pub grade: String,
@@ -25,6 +26,7 @@ pub struct Employee {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateEmployees {
+    pub employee_code: i64,
     pub name: String,
     pub group: String,
     pub grade: String,

@@ -6,6 +6,7 @@ import ui from "../styles/ui.module.css";
 
 interface Employee {
   id: number;
+  employeeCode: number;
   name: string;
   group: string;
   grade: string;
@@ -25,6 +26,7 @@ interface Employee {
 
 interface Row {
   tempId: number;
+  employeeCode: number;
   name: string;
   group: string;
   grade: string;
@@ -51,11 +53,15 @@ const BUDGET_FIELDS = [
   "monthlyBudget9", "monthlyBudget10", "monthlyBudget11", "monthlyBudget12",
 ] as const satisfies (keyof Row)[];
 
+// CSV列順: 社員番号,社員名,グループ,グレード,4月予算〜3月予算
+const CSV_HEADER = ["社員番号", "社員名", "グループ", "グレード", ...MONTH_ORDER.map((m) => `${m}月予算`)].join(",");
+
 let nextTempId = 0;
 
 function emptyRow(): Row {
   return {
     tempId: nextTempId++,
+    employeeCode: 0,
     name: "", group: "", grade: "",
     monthlyBudget1: 0, monthlyBudget2: 0, monthlyBudget3: 0,
     monthlyBudget4: 0, monthlyBudget5: 0, monthlyBudget6: 0,
@@ -67,6 +73,7 @@ function emptyRow(): Row {
 function employeeToRow(e: Employee): Row {
   return {
     tempId: nextTempId++,
+    employeeCode: e.employeeCode,
     name: e.name, group: e.group, grade: e.grade,
     monthlyBudget1: e.monthlyBudget1, monthlyBudget2: e.monthlyBudget2,
     monthlyBudget3: e.monthlyBudget3, monthlyBudget4: e.monthlyBudget4,
@@ -76,9 +83,6 @@ function employeeToRow(e: Employee): Row {
     monthlyBudget11: e.monthlyBudget11, monthlyBudget12: e.monthlyBudget12,
   };
 }
-
-// CSV列順: name,group,grade,4月予算,5月予算,...,3月予算（会計年度順）
-const CSV_HEADER = ["社員名", "グループ", "グレード", ...MONTH_ORDER.map((m) => `${m}月予算`)].join(",");
 
 async function downloadCSVTemplate() {
   const path = await save({
@@ -96,7 +100,7 @@ async function exportCSV(rows: Row[]) {
   });
   if (!path) return;
   const lines = rows.map((r) =>
-    [r.name, r.group, r.grade, ...BUDGET_FIELDS.map((f) => r[f])].join(",")
+    [r.employeeCode, r.name, r.group, r.grade, ...BUDGET_FIELDS.map((f) => r[f])].join(",")
   );
   await writeTextFile(path, "\uFEFF" + CSV_HEADER + "\n" + lines.join("\n") + "\n");
 }
@@ -104,18 +108,23 @@ async function exportCSV(rows: Row[]) {
 function parseCSV(rawText: string): { rows: Row[]; error: string | null } {
   const text = rawText.replace(/^\uFEFF/, "");
   const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");
-  const dataLines = lines[0]?.split(",")[0].trim() === "社員名" ? lines.slice(1) : lines;
+  const dataLines = lines[0]?.split(",")[0].trim() === "社員番号" ? lines.slice(1) : lines;
   const rows: Row[] = [];
   for (let i = 0; i < dataLines.length; i++) {
     const cols = dataLines[i].split(",").map((c) => c.trim());
-    if (cols.length < 3) {
-      return { rows: [], error: `${i + 1}行目: 列数が不足しています（社員名,グループ,グレード[,4月予算〜3月予算]）` };
+    if (cols.length < 4) {
+      return { rows: [], error: `${i + 1}行目: 列数が不足しています（社員番号,社員名,グループ,グレード[,4月予算〜3月予算]）` };
     }
-    const [name, group, grade, ...budgets] = cols;
+    const [employeeCodeStr, name, group, grade, ...budgets] = cols;
+    const employeeCode = Number(employeeCodeStr);
+    if (!employeeCodeStr || isNaN(employeeCode) || employeeCode <= 0) {
+      return { rows: [], error: `${i + 1}行目: 社員番号は1以上の数値で入力してください` };
+    }
     if (!name || !group || !grade) {
       return { rows: [], error: `${i + 1}行目: 社員名・グループ・グレードは必須です` };
     }
     const row = emptyRow();
+    row.employeeCode = employeeCode;
     row.name = name; row.group = group; row.grade = grade;
     BUDGET_FIELDS.forEach((field, idx) => {
       row[field] = budgets[idx] ? (Number(budgets[idx]) || 0) : 0;
@@ -156,7 +165,7 @@ export default function EmployeeManagement() {
     setRows((prev) => prev.map((r) => r.tempId === tempId ? { ...r, [field]: value } : r));
   }
 
-  function updateBudget(tempId: number, field: typeof BUDGET_FIELDS[number], value: string) {
+  function updateNumber(tempId: number, field: "employeeCode" | typeof BUDGET_FIELDS[number], value: string) {
     setRows((prev) => prev.map((r) => r.tempId === tempId ? { ...r, [field]: Number(value) || 0 } : r));
   }
 
@@ -179,9 +188,11 @@ export default function EmployeeManagement() {
   }
 
   async function handleSave() {
-    const invalid = rows.some((r) => !r.name.trim() || !r.group.trim() || !r.grade.trim());
+    const invalid = rows.some(
+      (r) => !r.name.trim() || !r.group.trim() || !r.grade.trim() || r.employeeCode <= 0
+    );
     if (invalid) {
-      setMessage({ type: "error", text: "全行の社員名・グループ・グレードを入力してください。" });
+      setMessage({ type: "error", text: "全行の社員番号・社員名・グループ・グレードを入力してください。" });
       return;
     }
     setMessage(null);
@@ -189,6 +200,7 @@ export default function EmployeeManagement() {
     try {
       await invoke("update_employees", {
         employees: rows.map((r) => ({
+          employeeCode: r.employeeCode,
           name: r.name.trim(),
           group: r.group.trim(),
           grade: r.grade.trim(),
@@ -241,6 +253,7 @@ export default function EmployeeManagement() {
             </button>
           </div>
         </div>
+        <h3>※予算は千円単位での入力</h3>
 
         {message && (
           <p className={message.type === "error" ? ui.msgError : ui.msgSuccess} style={{ marginBottom: 12 }}>
@@ -249,9 +262,10 @@ export default function EmployeeManagement() {
         )}
 
         <div className={ui.tableWrap}>
-          <table style={{ minWidth: 1400 }}>
+          <table style={{ minWidth: 1500 }}>
             <thead>
               <tr>
+                <th style={{ minWidth: 90 }}>社員番号</th>
                 <th>社員名</th>
                 <th>グループ</th>
                 <th>グレード</th>
@@ -264,7 +278,7 @@ export default function EmployeeManagement() {
             <tbody>
               {rows.length === 0 ? (
                 <tr className={ui.emptyRow}>
-                  <td colSpan={16}>社員が登録されていません</td>
+                  <td colSpan={17}>社員が登録されていません</td>
                 </tr>
               ) : (
                 rows.map((row, i) => (
@@ -272,6 +286,15 @@ export default function EmployeeManagement() {
                     <td>
                       <input
                         ref={i === rows.length - 1 ? lastRowRef : undefined}
+                        type="number"
+                        value={row.employeeCode || ""}
+                        onChange={(e) => updateNumber(row.tempId, "employeeCode", e.target.value)}
+                        placeholder="12345"
+                        style={{ width: "100%", textAlign: "right" }}
+                      />
+                    </td>
+                    <td>
+                      <input
                         type="text"
                         value={row.name}
                         onChange={(e) => updateText(row.tempId, "name", e.target.value)}
@@ -302,7 +325,7 @@ export default function EmployeeManagement() {
                         <input
                           type="number"
                           value={row[field]}
-                          onChange={(e) => updateBudget(row.tempId, field, e.target.value)}
+                          onChange={(e) => updateNumber(row.tempId, field, e.target.value)}
                           style={{ width: "100%", textAlign: "right" }}
                         />
                       </td>

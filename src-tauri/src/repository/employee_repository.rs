@@ -3,7 +3,7 @@ use crate::model::employees::{Employee, UpdateEmployees};
 
 pub async fn get_all_employees_repo(pool: &SqlitePool) -> Result<Vec<Employee>, String> {
     sqlx::query_as::<_, Employee>(
-        r#"SELECT id, name, "group", grade,
+        r#"SELECT id, employee_code, name, "group", grade,
            monthly_budget1, monthly_budget2, monthly_budget3, monthly_budget4,
            monthly_budget5, monthly_budget6, monthly_budget7, monthly_budget8,
            monthly_budget9, monthly_budget10, monthly_budget11, monthly_budget12
@@ -31,12 +31,13 @@ pub async fn insert_employees_repo(
     for e in employees {
         sqlx::query(
             r#"INSERT INTO employees
-               (name, "group", grade,
+               (employee_code, name, "group", grade,
                 monthly_budget1, monthly_budget2, monthly_budget3, monthly_budget4,
                 monthly_budget5, monthly_budget6, monthly_budget7, monthly_budget8,
                 monthly_budget9, monthly_budget10, monthly_budget11, monthly_budget12)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"#,
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"#,
         )
+        .bind(e.employee_code)
         .bind(&e.name)
         .bind(&e.group)
         .bind(&e.grade)

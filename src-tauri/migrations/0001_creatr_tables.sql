@@ -1,6 +1,7 @@
   -- 0001_create_tables.sql
   CREATE TABLE IF NOT EXISTS employees (
       id    INTEGER PRIMARY KEY AUTOINCREMENT,
+      employee_code INTEGER NOT NULL UNIQUE,
       name  TEXT    NOT NULL,
       "group" TEXT  NOT NULL,
       grade TEXT    NOT NULL,
@@ -20,6 +21,7 @@
 
   CREATE TABLE IF NOT EXISTS orders (
       id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_code   INTEGER NOT NULL UNIQUE,
       staff_name    TEXT    NOT NULL,
       amount        INTEGER NOT NULL,
       gross_profit  INTEGER NOT NULL,
