@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { save } from "@tauri-apps/plugin-dialog";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 import ui from "../styles/ui.module.css";
 
 type Tab = "person" | "group";
@@ -42,6 +44,57 @@ function buildGroupSummaries(data: CsMemberOrderSummary[]) {
 }
 
 const fmt = (n: number) => `¥${n.toLocaleString()}`;
+const fmtRate = (profit: number, bugget: number) =>
+  bugget === 0 ? "—" : `${((profit / bugget) * 100).toFixed(1)}%`;
+
+async function exportPersonCsv(
+  data: CsMemberOrderSummary[],
+  grouped: Map<string, CsMemberOrderSummary[]>,
+  period: string,
+) {
+  const path = await save({
+    defaultPath: `CS受注予実管理表_担当別_${period}.csv`,
+    filters: [{ name: "CSV", extensions: ["csv"] }],
+  });
+  if (!path) return;
+
+  const header = ["名前", "GROUP", "GRADE", `${period}件数`, `${period}売上(千円)`, `${period}粗利(千円)`, `${period}予算(千円)`, `${period}達成率`];
+  const lines: string[] = [header.join(",")];
+
+  for (const [group, rows] of grouped.entries()) {
+    for (const r of rows) {
+      lines.push([r.csName, r.group, r.grade, r.projectCount, r.amount, r.grossProfit, r.bugget, fmtRate(r.grossProfit, r.bugget)].join(","));
+    }
+    const sub = { projectCount: rows.reduce((s, r) => s + r.projectCount, 0), amount: rows.reduce((s, r) => s + r.amount, 0), grossProfit: rows.reduce((s, r) => s + r.grossProfit, 0), bugget: rows.reduce((s, r) => s + r.bugget, 0) };
+    lines.push([`${group} 小計`, "", "", sub.projectCount, sub.amount, sub.grossProfit, sub.bugget, fmtRate(sub.grossProfit, sub.bugget)].join(","));
+  }
+  const total = { projectCount: data.reduce((s, r) => s + r.projectCount, 0), amount: data.reduce((s, r) => s + r.amount, 0), grossProfit: data.reduce((s, r) => s + r.grossProfit, 0), bugget: data.reduce((s, r) => s + r.bugget, 0) };
+  lines.push(["合計", "", "", total.projectCount, total.amount, total.grossProfit, total.bugget, fmtRate(total.grossProfit, total.bugget)].join(","));
+
+  await writeTextFile(path, "\uFEFF" + lines.join("\n") + "\n");
+}
+
+async function exportGroupCsv(
+  groupSummaries: ReturnType<typeof buildGroupSummaries>,
+  groupTotal: { memberCount: number; projectCount: number; amount: number; grossProfit: number; bugget: number },
+  period: string,
+) {
+  const path = await save({
+    defaultPath: `CS受注予実管理表_グループ別_${period}.csv`,
+    filters: [{ name: "CSV", extensions: ["csv"] }],
+  });
+  if (!path) return;
+
+  const header = ["グループ", "人数", `${period}件数`, `${period}売上(千円)`, `${period}粗利(千円)`, `${period}予算(千円)`, `${period}達成率`];
+  const lines: string[] = [header.join(",")];
+
+  for (const r of groupSummaries) {
+    lines.push([r.group, r.memberCount, r.projectCount, r.amount, r.grossProfit, r.bugget, fmtRate(r.grossProfit, r.bugget)].join(","));
+  }
+  lines.push(["合計", groupTotal.memberCount, groupTotal.projectCount, groupTotal.amount, groupTotal.grossProfit, groupTotal.bugget, fmtRate(groupTotal.grossProfit, groupTotal.bugget)].join(","));
+
+  await writeTextFile(path, "\uFEFF" + lines.join("\n") + "\n");
+}
 
 function RateCell({ profit, bugget }: { profit: number; bugget: number }) {
   if (bugget === 0) return <td className={ui.num}>—</td>;
@@ -88,6 +141,7 @@ export default function Report() {
     memberCount: groupSummaries.reduce((s, r) => s + r.memberCount, 0),
     ...total,
   };
+  const period = appliedFrom === appliedTo ? `${appliedFrom}月` : `${appliedFrom}~${appliedTo}月`;
 
   return (
     <div className={ui.reportPage}>
@@ -127,11 +181,24 @@ export default function Report() {
         >
           グループ集計
         </button>
+        <div className={ui.tabActions}>
+          {tab === "person" && (
+            <button className={`${ui.btn} ${ui.btnSecondary}`} onClick={() => exportPersonCsv(data, grouped, period)} disabled={data.length === 0}>
+              CSV出力
+            </button>
+          )}
+          {tab === "group" && (
+            <button className={`${ui.btn} ${ui.btnSecondary}`} onClick={() => exportGroupCsv(groupSummaries, groupTotal, period)} disabled={groupSummaries.length === 0}>
+              CSV出力
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 担当別 */}
       {tab === "person" && (
         <div className={ui.reportTableWrap}>
+          <span className={ui.unitNote}>（単位：千円）</span>
           <table>
             <thead>
               <tr>
@@ -172,7 +239,7 @@ export default function Report() {
                         <td>{row.csName}</td>
                         <td>{row.group}</td>
                         <td>{row.grade}</td>
-                        <td className={ui.num}>{row.projectCount}</td>
+                        <td className={ui.num}>{row.projectCount}件</td>
                         <td className={ui.num}>{fmt(row.amount)}</td>
                         <td className={ui.num}>{fmt(row.grossProfit)}</td>
                         <td className={ui.num}>{fmt(row.bugget)}</td>
@@ -181,7 +248,7 @@ export default function Report() {
                     )),
                     <tr key={`sub-${group}`} className={ui.subtotalRow}>
                       <td colSpan={3}>{group} 小計</td>
-                      <td className={ui.num}>{sub.projectCount}</td>
+                      <td className={ui.num}>{sub.projectCount}件</td>
                       <td className={ui.num}>{fmt(sub.amount)}</td>
                       <td className={ui.num}>{fmt(sub.grossProfit)}</td>
                       <td className={ui.num}>{fmt(sub.bugget)}</td>
@@ -208,16 +275,29 @@ export default function Report() {
       {/* グループ集計 */}
       {tab === "group" && (
         <div className={ui.reportTableWrap}>
+          <span className={ui.unitNote}>（単位：千円）</span>
           <table>
             <thead>
               <tr>
                 <th>グループ</th>
                 <th className={ui.num}>人数</th>
-                <th className={ui.num}>{appliedFrom}~{appliedTo}月件数</th>
-                <th className={ui.num}>{appliedFrom}~{appliedTo}月売上</th>
-                <th className={ui.num}>{appliedFrom}~{appliedTo}月粗利</th>
-                <th className={ui.num}>{appliedFrom}~{appliedTo}月予算</th>
-                <th className={ui.num}>{appliedFrom}~{appliedTo}月達成率</th>
+                { appliedFrom === appliedTo ? (
+                  <>
+                    <th className={ui.num}>{appliedFrom}月件数</th>
+                    <th className={ui.num}>{appliedFrom}月売上</th>
+                    <th className={ui.num}>{appliedFrom}月粗利</th>
+                    <th className={ui.num}>{appliedFrom}月予算</th>
+                    <th className={ui.num}>{appliedFrom}月達成率</th>
+                  </>
+                ) : (
+                  <>
+                    <th className={ui.num}>{appliedFrom}~{appliedTo}月件数</th>
+                    <th className={ui.num}>{appliedFrom}~{appliedTo}月売上</th>
+                    <th className={ui.num}>{appliedFrom}~{appliedTo}月粗利</th>
+                    <th className={ui.num}>{appliedFrom}~{appliedTo}月予算</th>
+                    <th className={ui.num}>{appliedFrom}~{appliedTo}月達成率</th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -229,8 +309,8 @@ export default function Report() {
                 groupSummaries.map((row) => (
                   <tr key={row.group}>
                     <td>{row.group}</td>
-                    <td className={ui.num}>{row.memberCount}</td>
-                    <td className={ui.num}>{row.projectCount}</td>
+                    <td className={ui.num}>{row.memberCount}人</td>
+                    <td className={ui.num}>{row.projectCount}件</td>
                     <td className={ui.num}>{fmt(row.amount)}</td>
                     <td className={ui.num}>{fmt(row.grossProfit)}</td>
                     <td className={ui.num}>{fmt(row.bugget)}</td>
@@ -242,8 +322,8 @@ export default function Report() {
             <tfoot>
               <tr>
                 <td>合計</td>
-                <td className={ui.num}>{groupTotal.memberCount}</td>
-                <td className={ui.num}>{groupTotal.projectCount}</td>
+                <td className={ui.num}>{groupTotal.memberCount}人</td>
+                <td className={ui.num}>{groupTotal.projectCount}件</td>
                 <td className={ui.num}>{fmt(groupTotal.amount)}</td>
                 <td className={ui.num}>{fmt(groupTotal.grossProfit)}</td>
                 <td className={ui.num}>{fmt(groupTotal.bugget)}</td>

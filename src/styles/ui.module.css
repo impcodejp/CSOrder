@@ -168,8 +168,14 @@
 .tabs {
   display: flex;
   gap: 0;
+  align-items: center;
   border-bottom: 2px solid var(--clr-border);
   margin-bottom: 20px;
+}
+
+.tabActions {
+  margin-left: auto;
+  padding-bottom: 2px;
 }
 
 .tab {
@@ -266,6 +272,13 @@
   border-radius: var(--radius-sm);
   color: var(--clr-brand);
   font-size: 13px;
+}
+
+
+/* ── 単位注記 ────────────────────────────────── */
+.unitNote {
+  font-size: 11px;
+  color: var(--clr-text-3);
 }
 
 /* ── 達成率バッジ ────────────────────────────── */
