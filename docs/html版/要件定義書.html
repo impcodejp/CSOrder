@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSOrder 要件定義書</title>
+<style>
+  :root {
+    --brand: #4f46e5;
+    --brand-light: #eef2ff;
+    --brand-dark: #3730a3;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --border: #e2e8f0;
+    --surface: #ffffff;
+    --bg: #f8fafc;
+    --sidebar-w: 260px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Yu Gothic UI", "Meiryo UI", "Meiryo", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    background: var(--bg);
+    display: flex;
+  }
+
+  /* ── サイドバー ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--text);
+    color: #e2e8f0;
+    padding: 24px 0;
+    position: fixed;
+    top: 0; left: 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  #sidebar .logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid #334155;
+    margin-bottom: 12px;
+  }
+  #sidebar .logo h1 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  #sidebar .logo p {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 4px;
+  }
+  #sidebar nav a {
+    display: block;
+    padding: 7px 20px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 12.5px;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  #sidebar nav a:hover {
+    color: #fff;
+    background: #1e293b;
+    border-left-color: var(--brand);
+  }
+  #sidebar nav .section-label {
+    padding: 12px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #475569;
+  }
+
+  /* ── メインコンテンツ ── */
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 48px 48px 80px;
+    max-width: 960px;
+  }
+
+  /* ── ヘッダー ── */
+  .doc-header {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff;
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 20px rgba(79,70,229,0.3);
+  }
+  .doc-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 12px; }
+  .doc-header .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .doc-header .meta span { font-size: 12px; opacity: 0.85; }
+  .doc-header .meta strong { opacity: 1; }
+
+  /* ── セクション ── */
+  section { margin-bottom: 48px; }
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    padding: 10px 16px;
+    background: var(--brand-light);
+    border-left: 4px solid var(--brand);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 20px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--brand-dark);
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+  }
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-2);
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  p { margin-bottom: 12px; color: var(--text-2); }
+
+  /* ── テーブル ── */
+  .table-wrap { overflow-x: auto; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: #f1f5f9;
+    color: var(--text-2);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #f8fafc; }
+
+  /* ── コードブロック ── */
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 20px 24px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  code {
+    font-family: "Cascadia Code", "Consolas", "Monaco", monospace;
+  }
+  p code, li code, td code {
+    background: #f1f5f9;
+    color: var(--brand-dark);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: "Cascadia Code", "Consolas", monospace;
+  }
+
+  /* ── リスト ── */
+  ul, ol { padding-left: 20px; margin-bottom: 12px; color: var(--text-2); }
+  li { margin-bottom: 4px; }
+
+  /* ── バッジ ── */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .badge-brand { background: var(--brand-light); color: var(--brand); }
+  .badge-success { background: #f0fdf4; color: var(--success); }
+
+  /* ── カード ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  /* ── 区切り線 ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── フッター ── */
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-3);
+    text-align: center;
+  }
+
+  @media print {
+    #sidebar { display: none; }
+    #main { margin-left: 0; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- サイドバー -->
+<nav id="sidebar">
+  <div class="logo">
+    <h1>CSOrder</h1>
+    <p>要件定義書 v1.1</p>
+  </div>
+  <nav>
+    <div class="section-label">概要</div>
+    <a href="#sec1">1. システム概要</a>
+    <div class="section-label">機能要件</div>
+    <a href="#sec2">2. 機能一覧</a>
+    <a href="#sec2-2">2.2 データ取込</a>
+    <a href="#sec2-3">2.3 受注一覧</a>
+    <a href="#sec2-4">2.4 帳票出力</a>
+    <a href="#sec2-5">2.5 社員管理</a>
+    <div class="section-label">非機能要件</div>
+    <a href="#sec3">3. 非機能要件</a>
+    <div class="section-label">データ</div>
+    <a href="#sec4">4. データモデル</a>
+    <div class="section-label">API</div>
+    <a href="#sec5">5. バックエンドAPI</a>
+    <div class="section-label">画面</div>
+    <a href="#sec6">6. 画面一覧</a>
+    <div class="section-label">用語</div>
+    <a href="#sec7">7. 用語定義</a>
+  </nav>
+</nav>
+
+<!-- メインコンテンツ -->
+<main id="main">
+
+  <!-- ドキュメントヘッダー -->
+  <div class="doc-header">
+    <h1>CSOrder システム 要件定義書</h1>
+    <div class="meta">
+      <span><strong>バージョン</strong>: 1.1</span>
+      <span><strong>作成日</strong>: 2026-04-27</span>
+      <span><strong>最終更新</strong>: 2026-04-30</span>
+      <span><strong>対象システム</strong>: CSOrder（CS受注予実管理システム）</span>
+    </div>
+  </div>
+
+  <!-- 1. システム概要 -->
+  <section id="sec1">
+    <h2>1. システム概要</h2>
+
+    <h3>1.1 目的</h3>
+    <p>CS（カスタマーサクセス）メンバーの受注データをCSVから取り込み、担当者別・グループ別の売上・粗利・予算達成率を管理・集計する社内向けデスクトップアプリケーション。</p>
+
+    <h3>1.2 システム構成</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>区分</th><th>技術</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>フレームワーク</td><td><code>Tauri 2</code></td><td>クロスプラットフォームデスクトップアプリ</td></tr>
+          <tr><td>フロントエンド</td><td><code>React 19 + TypeScript + Vite</code></td><td>UIレイヤー</td></tr>
+          <tr><td>バックエンド</td><td><code>Rust</code></td><td>コマンドハンドラ・ビジネスロジック</td></tr>
+          <tr><td>データベース</td><td><code>SQLite (sqlx 0.8)</code></td><td>ローカルファイルDB・自動マイグレーション</td></tr>
+          <tr><td>通信方式</td><td><code>Tauriコマンド (invoke)</code></td><td>フロント↔バックエンド間IPC</td></tr>
+          <tr><td>文字コード変換</td><td><code>encoding_rs</code></td><td>SJIS → UTF-8 変換</td></tr>
+          <tr><td>CSVパース</td><td><code>csv crate (serde Deserialize)</code></td><td></td></tr>
+          <tr><td>インストーラー</td><td><code>NSIS</code></td><td>Windows向け・日本語・全ユーザー</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>1.3 動作環境</h3>
+    <ul>
+      <li>OS: Windows 10 / 11</li>
+      <li>画面解像度: 1280×720 以上推奨</li>
+      <li>ネットワーク: 不要（スタンドアロン動作）</li>
+    </ul>
+  </section>
+
+  <!-- 2. 機能要件 -->
+  <section id="sec2">
+    <h2>2. 機能要件</h2>
+
+    <h3>2.1 機能一覧</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>機能ID</th><th>機能名</th><th>概要</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-brand">F-01</span></td><td>データ取込</td><td>SJIS形式CSVを読み込み、受注データをDBに登録する</td></tr>
+          <tr><td><span class="badge badge-brand">F-02</span></td><td>受注一覧</td><td>登録済み受注データを一覧表示・検索する</td></tr>
+          <tr><td><span class="badge badge-brand">F-03</span></td><td>帳票出力</td><td>担当者別・グループ別の受注集計を表示・CSV出力する</td></tr>
+          <tr><td><span class="badge badge-brand">F-04</span></td><td>社員管理</td><td>社員情報・月次予算の登録・編集・CSV入出力を行う</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- F-01 -->
+    <h3 id="sec2-2">2.2 F-01: データ取込</h3>
+
+    <h4>2.2.1 概要</h4>
+    <p>SJIS形式のCSVファイルを選択してプレビューを確認後、受注データをDBに一括登録する。</p>
+
+    <h4>2.2.2 機能詳細</h4>
+    <ol>
+      <li>ユーザーがファイル選択ダイアログからCSVファイル（.csv）を選択する</li>
+      <li>バックエンドで SJIS → UTF-8 変換後、CSVをパース・バリデーションする</li>
+      <li>プレビューテーブル（担当者名・売上・粗利・案件名・顧客名・契約日）を表示する</li>
+      <li>エラーがある場合はプレビューを表示せずエラー内容を一覧表示する</li>
+      <li>「取込開始」ボタン押下で全件をDBへ一括登録する（all-or-nothing）</li>
+      <li>取込件数を成功メッセージとして表示する</li>
+    </ol>
+
+    <h4>2.2.3 CSVフォーマット</h4>
+    <ul>
+      <li>文字コード: <strong>Shift-JIS</strong>（バックエンドで自動変換）</li>
+      <li>区切り文字: カンマ（,）</li>
+      <li>1行目: ヘッダー行</li>
+    </ul>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>カラム名（ヘッダー）</th><th>データ型</th><th>必須</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>案件番号</td><td>数値</td><td><span class="badge badge-brand">○</span></td><td>案件を一意に識別する番号（UNIQUE）</td></tr>
+          <tr><td>案件名</td><td>文字列</td><td><span class="badge badge-brand">○</span></td><td>案件名称</td></tr>
+          <tr><td>顧客名</td><td>文字列</td><td><span class="badge badge-brand">○</span></td><td>顧客企業名</td></tr>
+          <tr><td>売上合計</td><td>数値</td><td><span class="badge badge-brand">○</span></td><td>受注金額（千円単位）</td></tr>
+          <tr><td>粗利合計</td><td>数値</td><td><span class="badge badge-brand">○</span></td><td>粗利額（千円単位）</td></tr>
+          <tr><td>契約日</td><td>YYYY/MM/DD</td><td><span class="badge badge-brand">○</span></td><td>契約締結日（空欄行はスキップ）</td></tr>
+          <tr><td>案件主担当者ID</td><td>数値</td><td><span class="badge badge-brand">○</span></td><td>社員番号（employees と結合するキー）</td></tr>
+          <tr><td>案件主担当者名</td><td>文字列</td><td><span class="badge badge-brand">○</span></td><td>担当者氏名</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>2.2.4 バリデーション</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>フィールド</th><th>検証内容</th></tr></thead>
+        <tbody>
+          <tr><td>案件番号</td><td>非空・数値変換可能</td></tr>
+          <tr><td>案件主担当者ID</td><td>非空・数値変換可能</td></tr>
+          <tr><td>案件主担当者名</td><td>非空</td></tr>
+          <tr><td>案件名</td><td>非空</td></tr>
+          <tr><td>顧客名</td><td>非空</td></tr>
+          <tr><td>売上合計・粗利合計</td><td>数値変換可能</td></tr>
+          <tr><td>契約日</td><td>YYYY/MM/DD 形式・月が 1〜12 の範囲内</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>契約日が空欄の行は<strong>エラーではなくスキップ</strong>（スキップ件数は表示）</li>
+      <li>バリデーションエラーが1件でもある場合はDBへの書き込みを行わない</li>
+      <li>同一案件番号のデータは上書き（UPSERT）する</li>
+    </ul>
+
+    <!-- F-02 -->
+    <h3 id="sec2-3">2.3 F-02: 受注一覧</h3>
+
+    <h4>2.3.1 概要</h4>
+    <p>登録されている受注データを一覧表示し、担当者名・顧客名で絞り込み検索できる。</p>
+
+    <h4>2.3.2 機能詳細</h4>
+    <ol>
+      <li>画面表示時に全受注データを取得・表示する</li>
+      <li>担当者名フィルタ（部分一致）で絞り込みができる</li>
+      <li>顧客名フィルタ（部分一致）で絞り込みができる</li>
+      <li>フィルタ変更時に自動で再検索する</li>
+      <li>金額は日本語ロケール形式（¥1,000,000）で表示する</li>
+    </ol>
+
+    <h4>2.3.3 表示カラム</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>カラム</th><th>表示名</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>ID</td><td></td></tr>
+          <tr><td>cs_name</td><td>担当者名</td><td></td></tr>
+          <tr><td>order_date</td><td>契約日</td><td>YYYY/MM/DD</td></tr>
+          <tr><td>amount</td><td>売上合計</td><td>千円単位・数値フォーマット</td></tr>
+          <tr><td>gross_profit</td><td>粗利合計</td><td>千円単位・数値フォーマット</td></tr>
+          <tr><td>project_name</td><td>案件名</td><td></td></tr>
+          <tr><td>client_name</td><td>顧客名</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- F-03 -->
+    <h3 id="sec2-4">2.4 F-03: 帳票出力</h3>
+
+    <h4>2.4.1 概要</h4>
+    <p>指定した期間（月〜月）の受注データを担当者別・グループ別に集計し、売上・粗利・予算・達成率を表示する。CSVエクスポートも可能。</p>
+
+    <h4>2.4.2 機能詳細</h4>
+    <ol>
+      <li>期間（開始月〜終了月）を入力し「更新」ボタンで集計を実行する</li>
+      <li>「担当別」タブと「グループ集計」タブを切り替えて表示する</li>
+      <li>担当別タブ: 社員ごとに件数・売上・粗利・予算・達成率を表示し、グループ小計行を挿入する</li>
+      <li>グループ集計タブ: グループごとに人数・件数・売上・粗利・予算・達成率を表示する</li>
+      <li>各タブに「CSV出力」ボタンがあり、表示内容をCSVファイルに出力できる</li>
+      <li>達成率は予算に対する粗利の割合（粗利 ÷ 予算 × 100）で算出する</li>
+      <li>達成率 ≥ 100%: 緑色表示、&lt; 80%: 赤色表示</li>
+    </ol>
+
+    <h4>2.4.3 表示カラム（担当別タブ）</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>カラム</th><th>内容</th><th>算出方法</th></tr></thead>
+        <tbody>
+          <tr><td>名前</td><td>担当者名</td><td></td></tr>
+          <tr><td>GROUP</td><td>グループ名</td><td></td></tr>
+          <tr><td>GRADE</td><td>グレード</td><td></td></tr>
+          <tr><td>{期間}件数</td><td>受注件数</td><td>COUNT</td></tr>
+          <tr><td>{期間}売上</td><td>売上合計（千円）</td><td>SUM(amount)</td></tr>
+          <tr><td>{期間}粗利</td><td>粗利合計（千円）</td><td>SUM(gross_profit)</td></tr>
+          <tr><td>{期間}予算</td><td>予算合計（千円）</td><td>SUM(budget)</td></tr>
+          <tr><td>{期間}達成率</td><td>予算達成率</td><td>粗利 ÷ 予算 × 100（%）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>※ 単月指定時は「4月件数」、複数月指定時は「4~6月件数」のように表示</p>
+
+    <!-- F-04 -->
+    <h3 id="sec2-5">2.5 F-04: 社員管理</h3>
+
+    <h4>2.5.1 概要</h4>
+    <p>システムに登録する社員情報と月次予算を管理する。スプレッドシート形式で一括編集し、「更新」で全件保存する。</p>
+
+    <h4>2.5.2 機能詳細</h4>
+    <ol>
+      <li>登録済み社員を一覧表示する（テーブル形式で全項目を表示）</li>
+      <li>「＋行追加」ボタンで末尾に空行を追加し、手入力で社員を追加できる</li>
+      <li>各行の「削除」ボタンで行を削除できる</li>
+      <li>「更新」ボタン押下で全行をDBに一括保存する（全件置換）</li>
+      <li>「CSV取込」でCSVファイルを選択し、画面に展開する（保存は「更新」で実行）</li>
+      <li>「CSV出力」で現在の画面内容をCSVファイルに出力できる</li>
+      <li>「レイアウト出力」でヘッダーのみのCSVテンプレートを出力できる</li>
+    </ol>
+
+    <h4>2.5.3 登録項目</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>項目</th><th>型</th><th>必須</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>社員番号</td><td>数値</td><td><span class="badge badge-brand">○</span></td><td>社員を一意に識別する番号（1以上）</td></tr>
+          <tr><td>社員名</td><td>文字列</td><td><span class="badge badge-brand">○</span></td><td>社員氏名</td></tr>
+          <tr><td>グループ</td><td>文字列</td><td><span class="badge badge-brand">○</span></td><td>所属グループ（例: 1G、2G、営業支援Gなど）</td></tr>
+          <tr><td>グレード</td><td>文字列</td><td><span class="badge badge-brand">○</span></td><td>グレード・職位（例: G1、G2、M1など）</td></tr>
+          <tr><td>4月予算〜3月予算</td><td>数値</td><td>—</td><td>各月の予算額（千円単位、省略時0）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>2.5.4 社員CSVフォーマット</h4>
+    <ul>
+      <li>文字コード: UTF-8（BOM付き）</li>
+      <li>月順: 会計年度順（4月〜3月）</li>
+    </ul>
+    <pre><code>社員番号,社員名,グループ,グレード,4月予算,5月予算,6月予算,7月予算,8月予算,9月予算,10月予算,11月予算,12月予算,1月予算,2月予算,3月予算</code></pre>
+
+    <h4>2.5.5 保存時バリデーション</h4>
+    <ul>
+      <li>全行の社員番号が1以上の数値であること</li>
+      <li>全行の社員名・グループ・グレードが非空であること</li>
+    </ul>
+  </section>
+
+  <!-- 3. 非機能要件 -->
+  <section id="sec3">
+    <h2>3. 非機能要件</h2>
+
+    <h3>3.1 パフォーマンス</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>項目</th><th>要件</th></tr></thead>
+        <tbody>
+          <tr><td>CSV取込</td><td>1,000件以下のCSVを5秒以内に取り込むこと</td></tr>
+          <tr><td>一覧表示</td><td>10,000件のデータを3秒以内に表示すること</td></tr>
+          <tr><td>帳票集計</td><td>10,000件のデータを3秒以内に集計すること</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.2 信頼性</h3>
+    <ul>
+      <li>CSV取込中にエラーが発生した場合、DBへの書き込みをロールバックすること（all-or-nothing）</li>
+      <li>アプリ起動時にDBファイルが存在しない場合、自動でスキーマを作成すること（自動マイグレーション）</li>
+      <li>社員情報更新時（<code>update_employees</code>）はトランザクションで employees・budget テーブルを一括更新する</li>
+    </ul>
+
+    <h3>3.3 セキュリティ</h3>
+    <ul>
+      <li>SQLインジェクション対策としてプリペアドステートメント（sqlx）を使用すること</li>
+      <li>Tauriのケイパビリティ設定により、フロントエンドからアクセスできるコマンドを必要最小限に制限すること</li>
+    </ul>
+
+    <h3>3.4 保守性</h3>
+    <p>バックエンドはコマンド層・サービス層・リポジトリ層に分離する。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>層</th><th>責務</th></tr></thead>
+        <tbody>
+          <tr><td><code>command/</code></td><td>Tauriコマンドのエントリーポイント（引数受け取り・AppState受け渡しのみ）</td></tr>
+          <tr><td><code>service/</code></td><td>ビジネスロジック（集計・バリデーション・変換処理）</td></tr>
+          <tr><td><code>repository/</code></td><td>DBアクセス（CRUD・SQLクエリ）</td></tr>
+          <tr><td><code>model/</code></td><td>各層で共有するデータ構造の定義</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. データモデル -->
+  <section id="sec4">
+    <h2>4. データモデル</h2>
+
+    <h3>4.1 ER図（概念）</h3>
+    <pre><code>社員 (employees)                 受注 (orders)
++--------------------+           +---------------------+
+| id (PK)            |           | id (PK)             |
+| employee_code (UQ) |←──────────| employee_code       |
+| name               |           | project_code (UQ)   |
+| group              |           | cs_name             |
+| grade              |           | amount              |
+| monthly_budget1~12 |           | gross_profit        |
++--------------------+           | project_name        |
+          |                      | client_name         |
+          |                      | order_date          |
+          ↓                      | order_month_int     |
+予算 (budget)                    +---------------------+
++--------------------+
+| id (PK)            |
+| code (=emp_code)   |
+| cs_name            |
+| month_int          |
+| budget             |
++--------------------+</code></pre>
+    <p>※ orders.employee_code と employees.employee_code は結合キーだが、DB外部キー制約は設定していない。社員マスタ未登録の担当者の受注も取り込み可能とする。</p>
+
+    <h3>4.2 テーブル定義</h3>
+
+    <h4>employees テーブル</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>カラム名</th><th>型</th><th>制約</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>INTEGER</td><td>PK, AUTOINCREMENT</td><td>社員ID</td></tr>
+          <tr><td>employee_code</td><td>INTEGER</td><td>UNIQUE, NOT NULL</td><td>社員番号</td></tr>
+          <tr><td>name</td><td>TEXT</td><td>NOT NULL</td><td>社員氏名</td></tr>
+          <tr><td>group</td><td>TEXT</td><td>NOT NULL</td><td>所属グループ</td></tr>
+          <tr><td>grade</td><td>TEXT</td><td>NOT NULL</td><td>グレード</td></tr>
+          <tr><td>monthly_budget1〜12</td><td>INTEGER</td><td></td><td>4月〜3月の月次予算（千円）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>orders テーブル</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>カラム名</th><th>型</th><th>制約</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>INTEGER</td><td>PK, AUTOINCREMENT</td><td>受注ID</td></tr>
+          <tr><td>project_code</td><td>INTEGER</td><td>UNIQUE, NOT NULL</td><td>案件番号</td></tr>
+          <tr><td>employee_code</td><td>INTEGER</td><td>NOT NULL</td><td>担当社員番号</td></tr>
+          <tr><td>cs_name</td><td>TEXT</td><td>NOT NULL</td><td>担当者名</td></tr>
+          <tr><td>amount</td><td>INTEGER</td><td>NOT NULL</td><td>売上合計（千円）</td></tr>
+          <tr><td>gross_profit</td><td>INTEGER</td><td>NOT NULL</td><td>粗利合計（千円）</td></tr>
+          <tr><td>project_name</td><td>TEXT</td><td>NOT NULL</td><td>案件名</td></tr>
+          <tr><td>client_name</td><td>TEXT</td><td>NOT NULL</td><td>顧客名</td></tr>
+          <tr><td>order_date</td><td>TEXT</td><td>NOT NULL</td><td>契約日（YYYY/MM/DD）</td></tr>
+          <tr><td>order_month_int</td><td>INTEGER</td><td>NOT NULL</td><td>会計月番号（4月=1〜3月=12）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>budget テーブル</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>カラム名</th><th>型</th><th>制約</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>INTEGER</td><td>PK, AUTOINCREMENT</td><td>ID</td></tr>
+          <tr><td>code</td><td>INTEGER</td><td>NOT NULL</td><td>employee_code と同値</td></tr>
+          <tr><td>cs_name</td><td>TEXT</td><td>NOT NULL</td><td>氏名</td></tr>
+          <tr><td>month_int</td><td>INTEGER</td><td>NOT NULL</td><td>会計月番号（1〜12）</td></tr>
+          <tr><td>budget</td><td>INTEGER</td><td>NOT NULL</td><td>月次予算（千円）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>※ <code>budget</code> テーブルは <code>update_employees</code> 実行時に全件削除→再生成される（employees の monthly_budget1〜12 を12行/人に展開）。</p>
+
+    <h3>4.3 会計月番号の変換ルール</h3>
+    <pre><code>会計月番号 = ((暦月 - 4 + 12) % 12) + 1
+
+例: 4月 → 1, 5月 → 2, 12月 → 9, 3月 → 12</code></pre>
+  </section>
+
+  <!-- 5. API仕様 -->
+  <section id="sec5">
+    <h2>5. バックエンドAPI仕様（Tauriコマンド）</h2>
+
+    <h3>5.1 コマンド一覧</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>コマンド名</th><th>引数</th><th>戻り値</th><th>対応機能</th></tr></thead>
+        <tbody>
+          <tr><td><code>get_employees</code></td><td>なし</td><td><code>Vec&lt;Employee&gt;</code></td><td>F-04</td></tr>
+          <tr><td><code>update_employees</code></td><td><code>employees: Vec&lt;UpdateEmployee&gt;</code></td><td><code>()</code></td><td>F-04</td></tr>
+          <tr><td><code>get_orders</code></td><td><code>cs_name?, client_name?</code></td><td><code>Vec&lt;Order&gt;</code></td><td>F-02</td></tr>
+          <tr><td><code>get_report</code></td><td><code>from: i64, to: i64</code></td><td><code>Vec&lt;CsMemberOrderSummary&gt;</code></td><td>F-03</td></tr>
+          <tr><td><code>preview_csv</code></td><td><code>path: String</code></td><td><code>Vec&lt;CsvPreviewRow&gt;</code></td><td>F-01</td></tr>
+          <tr><td><code>validate_csv</code></td><td><code>path: String</code></td><td><code>CsvValidationResult</code></td><td>F-01</td></tr>
+          <tr><td><code>import_orders</code></td><td><code>path: String</code></td><td><code>usize</code>（取込件数）</td><td>F-01</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>全コマンドは <code>Result&lt;T, String&gt;</code> を返す。エラー時はフロントエンドが <code>catch</code> し、エラーメッセージを画面表示する。</p>
+
+    <h3>5.2 主要データ型定義</h3>
+
+    <h4>Employee</h4>
+    <pre><code>interface Employee {
+  id: number;
+  employeeCode: number;
+  name: string;
+  group: string;
+  grade: string;
+  monthlyBudget1: number;   // 4月
+  // ...
+  monthlyBudget12: number;  // 3月
+}</code></pre>
+
+    <h4>Order</h4>
+    <pre><code>interface Order {
+  id: number;
+  csName: string;
+  orderDate: string;      // "YYYY/MM/DD"
+  amount: number;
+  grossProfit: number;
+  projectName: string;
+  clientName: string;
+}</code></pre>
+
+    <h4>CsMemberOrderSummary</h4>
+    <pre><code>interface CsMemberOrderSummary {
+  csName: string;
+  group: string;
+  grade: string;
+  projectCount: number;   // 指定期間の受注件数
+  amount: number;         // 指定期間の売上合計（千円）
+  grossProfit: number;    // 指定期間の粗利合計（千円）
+  bugget: number;         // 指定期間の予算合計（千円）
+}</code></pre>
+
+    <h4>CsvValidationResult</h4>
+    <pre><code>interface CsvValidationResult {
+  total: number;       // バリデーション対象行数（スキップ除く）
+  skipped: number;     // 契約日空欄によるスキップ行数
+  validCount: number;  // エラーなし行数
+  errors: { row: number; field: string; message: string }[];
+}</code></pre>
+  </section>
+
+  <!-- 6. 画面一覧 -->
+  <section id="sec6">
+    <h2>6. 画面一覧</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>画面ID</th><th>画面名</th><th>識別子</th><th>対応機能</th></tr></thead>
+        <tbody>
+          <tr><td>S-01</td><td>データ取込</td><td><code>data-import</code></td><td>F-01</td></tr>
+          <tr><td>S-02</td><td>受注一覧</td><td><code>order-list</code></td><td>F-02</td></tr>
+          <tr><td>S-03</td><td>帳票</td><td><code>report</code></td><td>F-03</td></tr>
+          <tr><td>S-04</td><td>社員管理</td><td><code>employee</code></td><td>F-04</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6.1 共通レイアウト</h3>
+    <ul>
+      <li>左サイドバー（幅180px）にナビゲーションメニューを配置</li>
+      <li>メインエリアは白カード上にコンテンツを表示</li>
+    </ul>
+  </section>
+
+  <!-- 7. 用語定義 -->
+  <section id="sec7">
+    <h2>7. 用語定義</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>用語</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>受注</td><td>顧客から受けた発注案件</td></tr>
+          <tr><td>担当者 / 社員</td><td>受注を担当するCSメンバー</td></tr>
+          <tr><td>粗利</td><td>受注金額から原価を引いた利益額</td></tr>
+          <tr><td>達成率</td><td>粗利 ÷ 予算 × 100（%）。予算に対する粗利の達成度</td></tr>
+          <tr><td>会計月番号</td><td>4月始まりの会計年度における月の番号（4月=1, 3月=12）</td></tr>
+          <tr><td>グループ</td><td>社員の所属グループ（例: 1G、2G、営業支援Gなど）</td></tr>
+          <tr><td>グレード</td><td>社員の等級・職位（例: G1、G2、M1など）</td></tr>
+          <tr><td>CSV取込</td><td>CSVファイルからDBへのデータ一括登録処理</td></tr>
+          <tr><td>UPSERT</td><td>同一案件番号のレコードが存在する場合は上書き、なければ新規挿入</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="doc-footer">
+    本書は CSOrder v1.1 の要件定義書です。変更が生じた場合はバージョンを更新してください。
+  </div>
+
+</main>
+</body>
+</html>

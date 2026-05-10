@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSOrder ユーザーマニュアル</title>
+<style>
+  :root {
+    --brand: #059669;
+    --brand-light: #ecfdf5;
+    --brand-dark: #047857;
+    --warn: #d97706;
+    --warn-light: #fffbeb;
+    --info: #0ea5e9;
+    --info-light: #e0f2fe;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --border: #e2e8f0;
+    --surface: #ffffff;
+    --bg: #f8fafc;
+    --sidebar-w: 260px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Yu Gothic UI", "Meiryo UI", "Meiryo", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    background: var(--bg);
+    display: flex;
+  }
+  #sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: #064e3b;
+    color: #d1fae5;
+    padding: 24px 0;
+    position: fixed;
+    top: 0; left: 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  #sidebar .logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid #065f46;
+    margin-bottom: 12px;
+  }
+  #sidebar .logo h1 { font-size: 16px; font-weight: 700; color: #fff; }
+  #sidebar .logo p { font-size: 11px; color: #6ee7b7; margin-top: 4px; }
+  #sidebar nav a {
+    display: block;
+    padding: 7px 20px;
+    color: #a7f3d0;
+    text-decoration: none;
+    font-size: 12.5px;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  #sidebar nav a:hover { color: #fff; background: #065f46; border-left-color: #34d399; }
+  #sidebar nav .section-label {
+    padding: 12px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6ee7b7;
+    opacity: 0.6;
+  }
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 48px 48px 80px;
+    max-width: 900px;
+  }
+  .doc-header {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff;
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 20px rgba(5,150,105,0.3);
+  }
+  .doc-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .doc-header p { font-size: 13px; opacity: 0.85; margin: 0; }
+  .doc-header .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 12px; }
+  .doc-header .meta span { font-size: 12px; opacity: 0.85; }
+
+  section { margin-bottom: 48px; }
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    padding: 10px 16px;
+    background: var(--brand-light);
+    border-left: 4px solid var(--brand);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 20px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--brand-dark);
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+  }
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-2);
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  p { margin-bottom: 12px; color: var(--text-2); }
+
+  /* ── テーブル ── */
+  .table-wrap { overflow-x: auto; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: #f1f5f9;
+    color: var(--text-2);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #f8fafc; }
+
+  /* ── コード ── */
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    font-family: "Cascadia Code", "Consolas", monospace;
+  }
+  p code, li code, td code {
+    background: #f1f5f9;
+    color: var(--brand-dark);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: "Cascadia Code", "Consolas", monospace;
+  }
+
+  /* ── リスト ── */
+  ul, ol { padding-left: 20px; margin-bottom: 12px; color: var(--text-2); }
+  li { margin-bottom: 4px; }
+
+  /* ── 注意・情報ボックス ── */
+  .note-warn {
+    background: var(--warn-light);
+    border-left: 4px solid var(--warn);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 16px;
+  }
+  .note-info {
+    background: var(--info-light);
+    border-left: 4px solid var(--info);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: #0369a1;
+    margin-bottom: 16px;
+  }
+  .note-warn strong, .note-info strong { display: block; margin-bottom: 4px; }
+
+  /* ── ステップ ── */
+  .steps { counter-reset: step; margin-bottom: 16px; }
+  .steps li {
+    counter-increment: step;
+    list-style: none;
+    padding: 10px 14px 10px 52px;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    color: var(--text-2);
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    background: var(--brand);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* ── スクリーン名称バッジ ── */
+  .screen-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--brand-light);
+    color: var(--brand-dark);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--brand-light);
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--brand-dark);
+  }
+  .faq-a {
+    padding: 12px 16px;
+    color: var(--text-2);
+    font-size: 13px;
+    background: var(--surface);
+  }
+
+  /* ── ナビカード（概要ページ） ── */
+  .nav-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .nav-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    border-top: 4px solid var(--brand);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .nav-card h4 { font-size: 14px; color: var(--text); margin-bottom: 6px; }
+  .nav-card p { font-size: 12.5px; margin: 0; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-3);
+    text-align: center;
+  }
+
+  @media print {
+    #sidebar { display: none; }
+    #main { margin-left: 0; padding: 20px; }
+    .steps li { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="logo">
+    <h1>CSOrder</h1>
+    <p>ユーザーマニュアル v1.1</p>
+  </div>
+  <nav>
+    <div class="section-label">はじめに</div>
+    <a href="#sec0">画面構成</a>
+    <div class="section-label">機能ガイド</div>
+    <a href="#sec1">1. 社員管理</a>
+    <a href="#sec1-2">社員の追加</a>
+    <a href="#sec1-4">CSVで一括登録</a>
+    <a href="#sec2">2. データ取込</a>
+    <a href="#sec2-1">CSVを取り込む</a>
+    <a href="#sec2-2">エラーへの対処</a>
+    <a href="#sec2-3">CSVの仕様</a>
+    <a href="#sec3">3. 受注一覧</a>
+    <a href="#sec4">4. 帳票</a>
+    <a href="#sec4-2">担当別タブ</a>
+    <a href="#sec4-3">グループ集計タブ</a>
+    <div class="section-label">参考</div>
+    <a href="#faq">よくある質問</a>
+    <a href="#storage">データ保存場所</a>
+  </nav>
+</nav>
+
+<main id="main">
+
+  <div class="doc-header">
+    <h1>CSOrder ユーザーマニュアル</h1>
+    <p>CS受注予実管理システム 操作ガイド</p>
+    <div class="meta">
+      <span><strong>バージョン</strong>: 1.1</span>
+      <span><strong>最終更新</strong>: 2026-04-30</span>
+    </div>
+  </div>
+
+  <!-- はじめに -->
+  <section id="sec0">
+    <h2>画面構成</h2>
+    <p>アプリを起動すると左側にナビゲーションメニューが表示されます。4つの画面から構成されています。</p>
+
+    <div class="nav-cards">
+      <div class="nav-card">
+        <h4>データ取込</h4>
+        <p>受注データCSVをシステムに読み込みます。SJIS形式のCSVに対応しています。</p>
+      </div>
+      <div class="nav-card">
+        <h4>受注一覧</h4>
+        <p>取り込み済みの受注データを確認・検索します。担当者名・顧客名で絞り込み可能です。</p>
+      </div>
+      <div class="nav-card">
+        <h4>帳票</h4>
+        <p>担当別・グループ別の集計レポートを確認します。期間指定とCSV出力に対応しています。</p>
+      </div>
+      <div class="nav-card">
+        <h4>社員管理</h4>
+        <p>社員情報と月次予算を登録・編集します。CSVインポート/エクスポートに対応しています。</p>
+      </div>
+    </div>
+
+    <div class="note-info">
+      <strong>はじめてお使いになる場合</strong>
+      まず「社員管理」画面で社員情報と月次予算を登録してください。社員情報が登録されていないと、帳票の達成率が正しく表示されません。
+    </div>
+  </section>
+
+  <!-- 1. 社員管理 -->
+  <section id="sec1">
+    <h2>1. 社員管理</h2>
+    <p>社員情報（社員番号・氏名・グループ・グレード）と月次予算を管理します。スプレッドシート形式で一括編集し、「更新」ボタンで保存します。</p>
+
+    <h3 id="sec1-2">1-2. 社員を追加する</h3>
+    <ol class="steps">
+      <li>右上の「＋ 行追加」ボタンをクリックします</li>
+      <li>追加された空行に社員番号・社員名・グループ・グレードを入力します</li>
+      <li>必要に応じて各月の予算額を入力します（千円単位）</li>
+      <li>「更新」ボタンをクリックして保存します</li>
+    </ol>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>項目</th><th>内容</th><th>例</th></tr></thead>
+        <tbody>
+          <tr><td>社員番号</td><td>1以上の数値（必須）</td><td><code>12345</code></td></tr>
+          <tr><td>社員名</td><td>氏名（必須）</td><td><code>山田 太郎</code></td></tr>
+          <tr><td>グループ</td><td>所属グループ名（必須）</td><td><code>1G</code></td></tr>
+          <tr><td>グレード</td><td>等級・職位（必須）</td><td><code>G1</code></td></tr>
+          <tr><td>各月予算</td><td>月ごとの予算（千円単位、省略時0）</td><td><code>1000</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note-warn">
+      <strong>注意</strong>「更新」を押さないと変更内容は保存されません。
+    </div>
+
+    <h3>1-3. 社員を削除する</h3>
+    <p>削除したい行の「削除」ボタンをクリックします。行が即時削除されます。「更新」ボタンで保存してください。</p>
+
+    <h3 id="sec1-4">1-4. CSVで一括登録する</h3>
+    <ol class="steps">
+      <li>「レイアウト出力」ボタンでCSVテンプレートをダウンロードします</li>
+      <li>テンプレートをExcelで開き、社員データを入力して保存します</li>
+      <li>「CSV取込」ボタンでそのファイルを選択します</li>
+      <li>画面に内容が展開されたことを確認します</li>
+      <li>「更新」ボタンをクリックして保存します</li>
+    </ol>
+
+    <h4>CSVのルール</h4>
+    <ul>
+      <li>文字コード: UTF-8（BOM付き）</li>
+      <li>月別予算の順番: 4月〜3月の順（会計年度順）</li>
+      <li>金額の単位: 千円</li>
+    </ul>
+    <pre>社員番号,社員名,グループ,グレード,4月予算,5月予算,6月予算,7月予算,8月予算,9月予算,10月予算,11月予算,12月予算,1月予算,2月予算,3月予算</pre>
+
+    <h3>1-5. 現在のデータをCSV出力する</h3>
+    <p>「CSV出力」ボタンをクリックし、保存先を指定します。</p>
+  </section>
+
+  <!-- 2. データ取込 -->
+  <section id="sec2">
+    <h2>2. データ取込</h2>
+    <p>受注データのCSVファイル（Shift-JIS形式）をシステムに読み込みます。</p>
+
+    <h3 id="sec2-1">2-1. CSVファイルを取り込む</h3>
+    <ol class="steps">
+      <li>「CSVファイルを選択」ボタンをクリックします</li>
+      <li>ファイル選択ダイアログで受注データのCSVファイルを選択します</li>
+      <li>プレビューが表示されます。内容を確認してください</li>
+      <li>問題がなければ「取込開始」ボタンをクリックします</li>
+      <li>「〇件取り込みました」と表示されれば完了です</li>
+    </ol>
+
+    <h4>プレビューで確認するポイント</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>確認項目</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>担当者名</td><td>正しい担当者名が表示されているか</td></tr>
+          <tr><td>契約日</td><td>正しい日付（YYYY/MM/DD形式）が表示されているか</td></tr>
+          <tr><td>売上・粗利</td><td>金額の値が正しいか（単位: 千円）</td></tr>
+          <tr><td>案件名・顧客名</td><td>文字化けしていないか</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="sec2-2">2-2. エラーが表示された場合</h3>
+    <p>バリデーションエラーがある場合はプレビューが表示されず、エラー内容が一覧で表示されます。CSVファイルを修正してから再度取り込んでください。</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>エラー内容</th><th>原因</th><th>対処</th></tr></thead>
+        <tbody>
+          <tr><td>案件番号が数値ではない</td><td>案件番号列に文字が入っている</td><td>CSVの該当行を修正する</td></tr>
+          <tr><td>売上合計が数値ではない</td><td>カンマ付き数値や文字が入っている</td><td>数値のみに修正する</td></tr>
+          <tr><td>案件名が空です</td><td>案件名が未入力</td><td>案件名を入力する</td></tr>
+          <tr><td>契約日の形式が正しくない</td><td>YYYY/MM/DD 以外の形式</td><td>日付形式を統一する</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note-info">
+      <strong>ヒント</strong>契約日が空欄の行は自動的にスキップされます（エラーにはなりません）。
+    </div>
+
+    <h3 id="sec2-3">2-3. CSVファイルの仕様</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>列名</th><th>型</th><th>必須</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>案件番号</td><td>数値</td><td>○</td><td>案件を一意に識別する番号。同一番号は上書きされる</td></tr>
+          <tr><td>案件名</td><td>文字列</td><td>○</td><td>案件名称</td></tr>
+          <tr><td>顧客名</td><td>文字列</td><td>○</td><td>顧客企業名</td></tr>
+          <tr><td>売上合計</td><td>数値</td><td>○</td><td>受注金額（千円単位）</td></tr>
+          <tr><td>粗利合計</td><td>数値</td><td>○</td><td>粗利額（千円単位）</td></tr>
+          <tr><td>契約日</td><td>YYYY/MM/DD</td><td>○</td><td>契約締結日（空欄行はスキップ）</td></tr>
+          <tr><td>案件主担当者ID</td><td>数値</td><td>○</td><td>社員番号</td></tr>
+          <tr><td>案件主担当者名</td><td>文字列</td><td>○</td><td>担当者氏名</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>文字コード: <strong>Shift-JIS</strong>（自動変換されます）</p>
+  </section>
+
+  <!-- 3. 受注一覧 -->
+  <section id="sec3">
+    <h2>3. 受注一覧</h2>
+    <p>取り込み済みの受注データを一覧で確認できます。</p>
+
+    <h3>3-1. 一覧を表示する</h3>
+    <p>画面を開くと全受注データが表示されます。金額は ¥1,000 形式（千円単位）で表示されます。</p>
+
+    <h3>3-2. 絞り込み検索</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>フィルター</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>担当者名フィルター</td><td>担当者名の一部を入力すると絞り込まれます（部分一致）</td></tr>
+          <tr><td>顧客名フィルター</td><td>顧客名の一部を入力すると絞り込まれます（部分一致）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>文字を入力すると自動的に再検索されます。</p>
+  </section>
+
+  <!-- 4. 帳票 -->
+  <section id="sec4">
+    <h2>4. 帳票</h2>
+    <p>担当者別・グループ別の受注集計を確認できます。</p>
+
+    <h3>4-1. 集計期間を指定する</h3>
+    <ol class="steps">
+      <li>「期間」の入力欄に開始月と終了月を入力します（暦月: 4〜3）</li>
+      <li>「更新」ボタンをクリックします</li>
+      <li>指定した期間の集計が表示されます</li>
+    </ol>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>確認したい期間</th><th>from</th><th>to</th></tr></thead>
+        <tbody>
+          <tr><td>4月単月</td><td>4</td><td>4</td></tr>
+          <tr><td>4月〜6月（第1四半期）</td><td>4</td><td>6</td></tr>
+          <tr><td>4月〜9月（上半期）</td><td>4</td><td>9</td></tr>
+          <tr><td>4月〜3月（年間）</td><td>4</td><td>3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="sec4-2">4-2. 担当別タブ</h3>
+    <p>社員ごとの集計を確認できます。グループ内での小計行、全体合計行が表示されます。</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>列</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>名前</td><td>社員名</td></tr>
+          <tr><td>GROUP</td><td>所属グループ</td></tr>
+          <tr><td>GRADE</td><td>グレード</td></tr>
+          <tr><td>{期間}件数</td><td>受注件数</td></tr>
+          <tr><td>{期間}売上</td><td>売上合計（千円）</td></tr>
+          <tr><td>{期間}粗利</td><td>粗利合計（千円）</td></tr>
+          <tr><td>{期間}予算</td><td>月次予算合計（千円）</td></tr>
+          <tr><td>{期間}達成率</td><td>粗利 ÷ 予算 × 100（%）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>達成率</th><th>表示色</th></tr></thead>
+        <tbody>
+          <tr><td>100% 以上</td><td style="color:#16a34a;font-weight:700;">緑色</td></tr>
+          <tr><td>80% 以上 100% 未満</td><td>通常色</td></tr>
+          <tr><td>80% 未満</td><td style="color:#dc2626;font-weight:700;">赤色</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="sec4-3">4-3. グループ集計タブ</h3>
+    <p>グループ単位での集計を確認できます。</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>列</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>グループ</td><td>グループ名</td></tr>
+          <tr><td>人数</td><td>グループの社員数</td></tr>
+          <tr><td>件数・売上・粗利・予算・達成率</td><td>担当別と同様</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4-4. CSVで出力する</h3>
+    <p>各タブの「CSV出力」ボタンをクリックすると、表示中の集計データをCSVファイルに保存できます。</p>
+    <ul>
+      <li>担当別: <code>CS受注予実管理表_担当別_{期間}.csv</code></li>
+      <li>グループ別: <code>CS受注予実管理表_グループ別_{期間}.csv</code></li>
+    </ul>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <h2>よくある質問</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">Q. 取り込んだデータを修正したい</div>
+      <div class="faq-a">修正したCSVファイルを再取込してください。同一の案件番号のデータは自動的に上書きされます。</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Q. 社員を削除したら帳票に表示されなくなった</div>
+      <div class="faq-a">帳票は社員マスタに登録されている社員を基準に集計します。削除した社員のデータは帳票に表示されません。受注データ自体はDBに残っています。</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Q. 予算の達成率が「—」で表示される</div>
+      <div class="faq-a">その社員の該当月の予算が0（未設定）の場合、達成率は「—」と表示されます。社員管理画面で予算を入力してください。</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Q. CSVの文字化けが発生する</div>
+      <div class="faq-a">受注CSVはShift-JIS形式である必要があります。UTF-8で保存されたCSVは文字化けする場合があります。</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Q. 同じ案件番号のデータを複数回取り込んだ</div>
+      <div class="faq-a">同一の案件番号はUPSERT（上書き挿入）されるため、最後に取り込んだデータが有効になります。重複は発生しません。</div>
+    </div>
+  </section>
+
+  <!-- データ保存場所 -->
+  <section id="storage">
+    <h2>データの保存場所</h2>
+    <p>システムのデータは以下の場所に保存されます。</p>
+    <pre>C:\Users\{ユーザー名}\AppData\Roaming\com.csorder.app\csorder.db</pre>
+    <div class="note-warn">
+      <strong>注意</strong>このファイルを削除するとすべてのデータが失われます。定期的にこのファイルをバックアップしてください。
+    </div>
+  </section>
+
+  <div class="doc-footer">CSOrder ユーザーマニュアル v1.1 — 最終更新: 2026-04-30</div>
+
+</main>
+</body>
+</html>

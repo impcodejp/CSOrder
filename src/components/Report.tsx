@@ -161,7 +161,11 @@ export default function Report() {
         >
           更新
         </button>
-        <span>表示中：{appliedFrom} 月 〜 {appliedTo} 月</span>
+        {appliedFrom === appliedTo ? (
+          <span>表示中：{appliedFrom} 月</span>
+        ) : (
+          <span>表示中：{appliedFrom} 月 〜 {appliedTo} 月</span>
+        )}
       </div>
 
       {error && <p className={ui.msgError}>{error}</p>}

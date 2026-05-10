@@ -31,7 +31,7 @@ pub async fn get_report(
             GROUP  BY code
         ) b_sum ON b_sum.code = e.employee_code
         GROUP BY e.id, e.name, e."group", e.grade
-        ORDER BY e."group", e.name
+        ORDER BY e."group", e.grade DESC, e.name
         "#,
     )
     .bind(nto)   // ?1 : 当月（to）

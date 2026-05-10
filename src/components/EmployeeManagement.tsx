@@ -262,15 +262,15 @@ export default function EmployeeManagement() {
         )}
 
         <div className={ui.tableWrap}>
-          <table style={{ minWidth: 1500 }}>
+          <table style={{ minWidth: 1400 }}>
             <thead>
               <tr>
-                <th style={{ minWidth: 90 }}>社員番号</th>
-                <th>社員名</th>
-                <th>グループ</th>
+                <th style={{ minWidth: 120 }}>社員番号</th>
+                <th style={{ minWidth: 120 }}>社員名</th>
+                <th style={{ minWidth: 150 }}>グループ</th>
                 <th>グレード</th>
                 {MONTH_ORDER.map((m, i) => (
-                  <th key={i} className={ui.num} style={{ minWidth: 90 }}>{m}月予算</th>
+                  <th key={i} className={`${ui.num} ${ui.budgetCell}`} style={{ minWidth: 75 }}>{m}月予算</th>
                 ))}
                 <th style={{ width: 60 }}></th>
               </tr>
@@ -321,7 +321,7 @@ export default function EmployeeManagement() {
                       />
                     </td>
                     {BUDGET_FIELDS.map((field) => (
-                      <td key={field}>
+                      <td key={field} className={ui.budgetCell}>
                         <input
                           type="number"
                           value={row[field]}

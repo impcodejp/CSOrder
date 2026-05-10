@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSOrder 設計書</title>
+<style>
+  :root {
+    --brand: #0ea5e9;
+    --brand-light: #e0f2fe;
+    --brand-dark: #0369a1;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --border: #e2e8f0;
+    --surface: #ffffff;
+    --bg: #f8fafc;
+    --sidebar-w: 260px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Yu Gothic UI", "Meiryo UI", "Meiryo", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    background: var(--bg);
+    display: flex;
+  }
+  #sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 24px 0;
+    position: fixed;
+    top: 0; left: 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  #sidebar .logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid #1e293b;
+    margin-bottom: 12px;
+  }
+  #sidebar .logo h1 { font-size: 16px; font-weight: 700; color: #fff; }
+  #sidebar .logo p { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+  #sidebar nav a {
+    display: block;
+    padding: 7px 20px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 12.5px;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  #sidebar nav a:hover { color: #fff; background: #1e293b; border-left-color: var(--brand); }
+  #sidebar nav .section-label {
+    padding: 12px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #475569;
+  }
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 48px 48px 80px;
+    max-width: 980px;
+  }
+  .doc-header {
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff;
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 20px rgba(14,165,233,0.3);
+  }
+  .doc-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 12px; }
+  .doc-header .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .doc-header .meta span { font-size: 12px; opacity: 0.85; }
+  section { margin-bottom: 48px; }
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    padding: 10px 16px;
+    background: var(--brand-light);
+    border-left: 4px solid var(--brand);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 20px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--brand-dark);
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+  }
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-2);
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  p { margin-bottom: 12px; color: var(--text-2); }
+  .table-wrap { overflow-x: auto; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: #f1f5f9;
+    color: var(--text-2);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #f8fafc; }
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 20px 24px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  code { font-family: "Cascadia Code", "Consolas", "Monaco", monospace; }
+  p code, li code, td code {
+    background: #f1f5f9;
+    color: var(--brand-dark);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: "Cascadia Code", "Consolas", monospace;
+  }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; color: var(--text-2); }
+  li { margin-bottom: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-brand { background: var(--brand-light); color: var(--brand-dark); }
+  .layer-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0 20px;
+    font-size: 13px;
+  }
+  .layer-flow .layer {
+    background: var(--brand-light);
+    color: var(--brand-dark);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .layer-flow .arrow { color: var(--text-3); font-size: 18px; }
+  .note {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: 10px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 16px;
+  }
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-3);
+    text-align: center;
+  }
+  @media print {
+    #sidebar { display: none; }
+    #main { margin-left: 0; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="logo">
+    <h1>CSOrder</h1>
+    <p>設計書 — 2026-04-30</p>
+  </div>
+  <nav>
+    <div class="section-label">概要</div>
+    <a href="#sec1">1. システム概要</a>
+    <a href="#sec2">2. ディレクトリ構成</a>
+    <div class="section-label">データベース</div>
+    <a href="#sec3">3. DB設計</a>
+    <a href="#sec3-2">3-2. employees</a>
+    <a href="#sec3-3">3-3. orders</a>
+    <a href="#sec3-4">3-4. budget</a>
+    <a href="#sec3-5">3-5. 月番号変換</a>
+    <div class="section-label">バックエンド</div>
+    <a href="#sec4">4. バックエンド設計</a>
+    <a href="#sec4-3">4-3. model定義</a>
+    <a href="#sec4-4">4-4. serviceロジック</a>
+    <a href="#sec4-5">4-5. SQL詳細</a>
+    <div class="section-label">インターフェース</div>
+    <a href="#sec5">5. コマンド詳細</a>
+    <div class="section-label">フロントエンド</div>
+    <a href="#sec6">6. 画面設計</a>
+    <div class="section-label">フロー</div>
+    <a href="#sec7">7. データフロー図</a>
+    <a href="#sec8">8. エラーハンドリング</a>
+  </nav>
+</nav>
+
+<main id="main">
+
+  <div class="doc-header">
+    <h1>CSOrder 設計書</h1>
+    <div class="meta">
+      <span><strong>最終更新</strong>: 2026-04-30</span>
+      <span><strong>対象バージョン</strong>: v1.1</span>
+    </div>
+  </div>
+
+  <!-- 1. システム概要 -->
+  <section id="sec1">
+    <h2>1. システム概要</h2>
+    <p>CSOrder は <strong>Tauri v2 + React (TypeScript) + SQLite</strong> で構成されるデスクトップアプリケーションです。CS メンバーの受注案件を管理し、担当別・グループ別の売上・粗利・予算達成率を集計・出力することを目的としています。</p>
+
+    <h3>技術スタック</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>レイヤー</th><th>技術</th></tr></thead>
+        <tbody>
+          <tr><td>フロントエンド</td><td>React 19 + TypeScript + Vite</td></tr>
+          <tr><td>バックエンド</td><td>Rust (Tauri v2)</td></tr>
+          <tr><td>DB</td><td>SQLite (sqlx 0.8 / 自動マイグレーション)</td></tr>
+          <tr><td>CSV デコード</td><td>encoding_rs (SJIS → UTF-8)</td></tr>
+          <tr><td>CSV パース</td><td>csv crate (serde Deserialize)</td></tr>
+          <tr><td>ファイルダイアログ</td><td>tauri-plugin-dialog</td></tr>
+          <tr><td>ファイル書き込み</td><td>tauri-plugin-fs</td></tr>
+          <tr><td>インストーラー</td><td>NSIS (Windows・日本語・全ユーザーインストール)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 2. ディレクトリ構成 -->
+  <section id="sec2">
+    <h2>2. ディレクトリ構成</h2>
+    <pre><code>CSOrder/
+├── src/                          # フロントエンド (React)
+│   ├── App.tsx                   # ルーティング・タブ切り替え
+│   ├── components/
+│   │   ├── EmployeeManagement.tsx  # 社員管理
+│   │   ├── OrderList.tsx           # 受注案件一覧
+│   │   ├── DataImport.tsx          # 受注 CSV 取込
+│   │   └── Report.tsx              # 帳票・CSV出力
+│   └── styles/
+│       ├── global.css
+│       └── ui.module.css
+│
+└── src-tauri/                    # バックエンド (Rust)
+    ├── migrations/               # SQLite マイグレーション
+    │   ├── 0001_creatr_tables.sql
+    │   ├── 0002_update_orders.sql
+    │   ├── 0003_rename_orders_columns.sql
+    │   ├── 0004_budget_table.sql
+    │   ├── 0005_add_employee_code_to_orders.sql
+    │   └── 0006_add_code_to_budget.sql
+    └── src/
+        ├── lib.rs                # Tauri エントリポイント・コマンド登録
+        ├── model/                # データ構造定義
+        ├── repository/           # DB アクセス層
+        ├── service/              # ビジネスロジック層
+        └── command/              # Tauri コマンド層</code></pre>
+  </section>
+
+  <!-- 3. DB設計 -->
+  <section id="sec3">
+    <h2>3. データベース設計</h2>
+
+    <h3>3-1. テーブル一覧</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>テーブル</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>employees</code></td><td>社員マスタ（社員番号・氏名・グループ・グレード・月次予算）</td></tr>
+          <tr><td><code>orders</code></td><td>受注案件（CSV取込データ）</td></tr>
+          <tr><td><code>budget</code></td><td>社員別月次予算（employeesから自動生成）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="sec3-2">3-2. employees テーブル</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>列名</th><th>型</th><th>制約</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>INTEGER</td><td>PK, AUTOINCREMENT</td><td>自動採番</td></tr>
+          <tr><td>employee_code</td><td>INTEGER</td><td>UNIQUE, NOT NULL</td><td>社員番号</td></tr>
+          <tr><td>name</td><td>TEXT</td><td>NOT NULL</td><td>氏名</td></tr>
+          <tr><td>group</td><td>TEXT</td><td>NOT NULL</td><td>グループ名</td></tr>
+          <tr><td>grade</td><td>TEXT</td><td>NOT NULL</td><td>グレード</td></tr>
+          <tr><td>monthly_budget1</td><td>INTEGER</td><td></td><td>4月予算（千円）</td></tr>
+          <tr><td>monthly_budget2</td><td>INTEGER</td><td></td><td>5月予算（千円）</td></tr>
+          <tr><td>monthly_budget3〜11</td><td>INTEGER</td><td></td><td>6月〜2月予算（千円）</td></tr>
+          <tr><td>monthly_budget12</td><td>INTEGER</td><td></td><td>3月予算（千円）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="sec3-3">3-3. orders テーブル</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>列名</th><th>型</th><th>制約</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>INTEGER</td><td>PK, AUTOINCREMENT</td><td>自動採番</td></tr>
+          <tr><td>project_code</td><td>INTEGER</td><td>UNIQUE, NOT NULL</td><td>案件番号（CSV の「案件番号」）</td></tr>
+          <tr><td>employee_code</td><td>INTEGER</td><td>NOT NULL</td><td>担当社員番号</td></tr>
+          <tr><td>cs_name</td><td>TEXT</td><td>NOT NULL</td><td>担当者名</td></tr>
+          <tr><td>amount</td><td>INTEGER</td><td>NOT NULL</td><td>売上合計（千円単位）</td></tr>
+          <tr><td>gross_profit</td><td>INTEGER</td><td>NOT NULL</td><td>粗利合計（千円単位）</td></tr>
+          <tr><td>project_name</td><td>TEXT</td><td>NOT NULL</td><td>案件名</td></tr>
+          <tr><td>client_name</td><td>TEXT</td><td>NOT NULL</td><td>顧客名</td></tr>
+          <tr><td>order_date</td><td>TEXT</td><td>NOT NULL</td><td>契約日（YYYY/MM/DD）</td></tr>
+          <tr><td>order_month_int</td><td>INTEGER</td><td>NOT NULL</td><td>会計月番号（4月=1, …, 3月=12）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="sec3-4">3-4. budget テーブル</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>列名</th><th>型</th><th>制約</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>INTEGER</td><td>PK, AUTOINCREMENT</td><td>自動採番</td></tr>
+          <tr><td>code</td><td>INTEGER</td><td>NOT NULL</td><td>employee_code と同値</td></tr>
+          <tr><td>cs_name</td><td>TEXT</td><td>NOT NULL</td><td>氏名</td></tr>
+          <tr><td>month_int</td><td>INTEGER</td><td>NOT NULL</td><td>会計月番号（4月=1〜3月=12）</td></tr>
+          <tr><td>budget</td><td>INTEGER</td><td>NOT NULL</td><td>月次予算（千円）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">budget テーブルは <code>update_employees</code> 実行時に全件削除→再生成される。employees の monthly_budget1〜12 を展開して 12行/人 として保持する。</div>
+
+    <h3 id="sec3-5">3-5. 会計月番号の変換ルール</h3>
+    <pre><code>会計月番号 = ((暦月 - 4 + 12) % 12) + 1
+
+例: 4月 → 1, 5月 → 2, 12月 → 9, 3月 → 12
+逆変換: 暦月 = ((会計月番号 + 2) % 12) + 1</code></pre>
+
+    <h3>3-6. マイグレーション履歴</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ファイル</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>0001</td><td>employees・orders テーブル作成</td></tr>
+          <tr><td>0002</td><td>orders に order_date 列追加</td></tr>
+          <tr><td>0003</td><td>orders.staff_name → cs_name にリネーム</td></tr>
+          <tr><td>0004</td><td>budget テーブル作成</td></tr>
+          <tr><td>0005</td><td>orders に employee_code・order_month_int 列追加</td></tr>
+          <tr><td>0006</td><td>budget に code 列追加</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. バックエンド設計 -->
+  <section id="sec4">
+    <h2>4. バックエンド設計</h2>
+
+    <h3>4-1. アーキテクチャ</h3>
+    <div class="layer-flow">
+      <span class="layer">フロント (invoke)</span>
+      <span class="arrow">→</span>
+      <span class="layer">command</span>
+      <span class="arrow">→</span>
+      <span class="layer">service</span>
+      <span class="arrow">→</span>
+      <span class="layer">repository</span>
+      <span class="arrow">→</span>
+      <span class="layer">SQLite</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>層</th><th>責務</th></tr></thead>
+        <tbody>
+          <tr><td><code>command</code></td><td>引数の受け取りと AppState の受け渡しのみ。ロジックを持たない。</td></tr>
+          <tr><td><code>service</code></td><td>ビジネスロジック。repository を呼び出す。</td></tr>
+          <tr><td><code>repository</code></td><td>SQL 実行のみ。ロジックを持たない。</td></tr>
+          <tr><td><code>model</code></td><td>各層で共有するデータ構造（struct）。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4-2. AppState</h3>
+    <pre><code>pub struct AppState {
+    pub db: SqlitePool,   // SQLite コネクションプール（アプリ全体で共有）
+}</code></pre>
+    <p>起動時に <code>app_data_dir/csorder.db</code> を作成・接続し、マイグレーションを自動実行する。</p>
+
+    <h3 id="sec4-3">4-3. model 定義</h3>
+
+    <h4>model/employees.rs</h4>
+    <pre><code>// DB から取得する社員情報（serde: camelCase）
+pub struct Employee {
+    pub id: i64,
+    pub employee_code: i64,
+    pub name: String,
+    pub group: String,
+    pub grade: String,
+    pub monthly_budget1〜12: i64,
+}
+
+// フロントから受け取る更新データ（serde: camelCase）
+pub struct UpdateEmployees {
+    pub employee_code: i64,
+    pub name: String,
+    pub group: String,
+    pub grade: String,
+    pub monthly_budget1〜12: i64,
+}</code></pre>
+
+    <h4>model/orders.rs</h4>
+    <pre><code>// DB から取得する受注情報（serde: camelCase）
+pub struct Order {
+    pub id: i64,
+    pub cs_name: String,
+    pub order_date: String,
+    pub amount: i64,
+    pub gross_profit: i64,
+    pub project_name: String,
+    pub client_name: String,
+}
+
+// CSV インポート時の挿入データ
+pub struct NewOrder {
+    pub project_code: i64,
+    pub employee_code: i64,
+    pub cs_name: String,
+    pub amount: i64,
+    pub gross_profit: i64,
+    pub project_name: String,
+    pub client_name: String,
+    pub order_date: String,
+    pub order_month_int: i64,
+}</code></pre>
+
+    <h4>model/report.rs</h4>
+    <pre><code>// 帳票集計行（serde: camelCase / FromRow）
+pub struct CsMemberOrderSummary {
+    pub cs_name: String,
+    pub group: String,
+    pub grade: String,
+    pub project_count: i64,   // 指定期間の受注件数
+    pub amount: i64,           // 指定期間の売上合計（千円）
+    pub gross_profit: i64,     // 指定期間の粗利合計（千円）
+    pub bugget: i64,           // 指定期間の予算合計（千円）
+}</code></pre>
+
+    <h4>model/csv_import.rs</h4>
+    <pre><code>// CSV 1行のデシリアライズ対象（ヘッダー名でマッピング）
+pub struct CsvRow {
+    // "案件番号"        → order_no
+    // "案件名"          → project_name
+    // "顧客名"          → client_name
+    // "売上合計"        → amount
+    // "粗利合計"        → gross_profit
+    // "契約日"          → order_date
+    // "案件主担当者ID"  → employee_code
+    // "案件主担当者名"  → cs_name
+}
+
+pub struct ValidationError { pub row: usize, pub field: String, pub message: String }
+
+pub struct CsvValidationResult {   // serde: camelCase
+    pub total: usize,
+    pub skipped: usize,
+    pub valid_count: usize,
+    pub errors: Vec&lt;ValidationError&gt;,
+}
+
+pub struct CsvPreviewRow {         // serde: camelCase
+    pub cs_name: String,
+    pub amount: i64,
+    pub gross_profit: i64,
+    pub project_name: String,
+    pub client_name: String,
+    pub order_date: String,
+}</code></pre>
+
+    <h3 id="sec4-4">4-4. service ロジック詳細</h3>
+
+    <h4>employee_service.rs</h4>
+    <p><strong>update_all_employees(pool, employees)</strong> の処理フロー:</p>
+    <ol>
+      <li>トランザクション開始</li>
+      <li><code>employees</code> テーブルを全件 DELETE</li>
+      <li>受け取った社員リストを INSERT</li>
+      <li><code>budget</code> テーブルを全件 DELETE</li>
+      <li><code>employees</code> から月次予算を展開し <code>budget</code> テーブルへ 12行/人 INSERT</li>
+      <li>コミット</li>
+    </ol>
+
+    <h4>report_service.rs</h4>
+    <p>画面から受け取る <code>from/to</code> は暦月。DB の <code>order_month_int</code> は会計月番号のため変換してから repository を呼ぶ。</p>
+    <pre><code>let nfrom = ((from - 4 + 12) % 12) + 1;
+let nto   = ((to   - 4 + 12) % 12) + 1;
+report_repository::get_report(pool, nfrom, nto).await</code></pre>
+
+    <h4>csv_import_service.rs の内部関数</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>関数</th><th>役割</th></tr></thead>
+        <tbody>
+          <tr><td><code>read_sjis_file(path)</code></td><td>ファイルをバイト列で読み込み、encoding_rs で SJIS → UTF-8 変換</td></tr>
+          <tr><td><code>validate_row(row, row_num)</code></td><td>1行の CsvRow を検証し Ok(NewOrder) または Err(Vec&lt;ValidationError&gt;) を返す</td></tr>
+          <tr><td><code>parse_i64(...)</code></td><td>文字列を i64 にパース。失敗時はエラーリストに追記して None を返す</td></tr>
+          <tr><td><code>require_str(...)</code></td><td>空文字チェック。空の場合はエラーリストに追記</td></tr>
+          <tr><td><code>date_to_month_int(date)</code></td><td>"YYYY/MM/DD" → 会計月番号（((月-4+12)%12)+1）に変換</td></tr>
+          <tr><td><code>parse_csv(utf8)</code></td><td>全行をループし、契約日空欄行はスキップ、それ以外は validate_row で検証</td></tr>
+          <tr><td><code>errors_to_string(errors)</code></td><td>エラーリストを "行N: フィールド - メッセージ" 形式の文字列に変換</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>csv_import_service.rs の公開関数</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>関数</th><th>動作</th></tr></thead>
+        <tbody>
+          <tr><td><code>preview_csv(path)</code></td><td>parse_csv 実行。エラーがあれば Err。なければ有効行を Vec&lt;CsvPreviewRow&gt; で返す</td></tr>
+          <tr><td><code>validate_csv(path)</code></td><td>parse_csv 実行。CsvValidationResult（合計/スキップ/有効数/エラーリスト）を返す</td></tr>
+          <tr><td><code>import_orders(pool, path)</code></td><td>parse_csv 実行。エラーがあれば Err。なければ全行を upsert_orders でDB登録し件数を返す</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">契約日が空欄の行はエラーではなくスキップ。upsert_orders は INSERT OR REPLACE INTO orders を使用し、project_code の UNIQUE 制約で既存レコードを上書きする。</div>
+
+    <h3 id="sec4-5">4-5. report_repository::get_report の SQL</h3>
+    <pre><code>SELECT
+    e.name                                                    AS cs_name,
+    e."group",
+    e.grade,
+    COALESCE(COUNT(o.id), 0)                                 AS project_count,
+    COALESCE(SUM(o.amount), 0)                               AS amount,
+    COALESCE(SUM(o.gross_profit), 0)                         AS gross_profit,
+    COALESCE(b_sum.sum_budget, 0)                            AS bugget
+FROM employees e
+LEFT JOIN orders o
+    ON  o.employee_code    = e.employee_code
+    AND o.order_month_int BETWEEN ?2 AND ?3
+LEFT JOIN budget b_month
+    ON  b_month.code      = e.employee_code
+    AND b_month.month_int = ?1
+LEFT JOIN (
+    SELECT code, SUM(budget) AS sum_budget
+    FROM   budget
+    WHERE  month_int BETWEEN ?2 AND ?3
+    GROUP  BY code
+) b_sum ON b_sum.code = e.employee_code
+GROUP BY e.id, e.name, e."group", e.grade
+ORDER BY e."group", e.grade DESC, e.name</code></pre>
+    <p>バインドパラメータ: <code>?1 = nto</code>（当月）, <code>?2 = nfrom</code>（期間開始）, <code>?3 = nto</code>（期間終了）</p>
+    <div class="note">返却されるのは指定期間（from〜to月）の合計1セット。フロントエンドは from == to の場合に「4月件数」、異なる場合に「4~6月件数」のようにラベルを切り替える。</div>
+  </section>
+
+  <!-- 5. コマンド詳細 -->
+  <section id="sec5">
+    <h2>5. フロントエンド ↔ バックエンド インターフェース</h2>
+
+    <h3>5-1. コマンド一覧</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>コマンド名</th><th>フロントエンドファイル</th></tr></thead>
+        <tbody>
+          <tr><td><code>get_employees</code></td><td>EmployeeManagement.tsx</td></tr>
+          <tr><td><code>update_employees</code></td><td>EmployeeManagement.tsx</td></tr>
+          <tr><td><code>get_orders</code></td><td>OrderList.tsx</td></tr>
+          <tr><td><code>get_report</code></td><td>Report.tsx</td></tr>
+          <tr><td><code>preview_csv</code></td><td>DataImport.tsx</td></tr>
+          <tr><td><code>validate_csv</code></td><td>DataImport.tsx</td></tr>
+          <tr><td><code>import_orders</code></td><td>DataImport.tsx</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>5-2. get_report</h3>
+    <pre><code>// 引数
+{ from: number, to: number }   // 暦月（4〜3）
+
+// 戻り値
+interface CsMemberOrderSummary {
+  csName: string;
+  group: string;
+  grade: string;
+  projectCount: number;   // from〜to月の受注件数
+  amount: number;         // from〜to月の売上合計（千円）
+  grossProfit: number;    // from〜to月の粗利合計（千円）
+  bugget: number;         // from〜to月の予算合計（千円）
+}</code></pre>
+
+    <h3>5-3. import_orders</h3>
+    <pre><code>// 引数
+{ path: string }
+
+// 戻り値（成功）: number（インポートした件数）
+// 戻り値（失敗）: Err(String) — バリデーションエラー一覧
+// 動作: エラーがある場合は DB に一切書き込まない（all-or-nothing）</code></pre>
+  </section>
+
+  <!-- 6. 画面設計 -->
+  <section id="sec6">
+    <h2>6. フロントエンド画面設計</h2>
+
+    <h3>6-1. 社員管理 (EmployeeManagement.tsx)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>機能</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>社員一覧表示</td><td>起動時に <code>get_employees</code> で全社員を取得・表示</td></tr>
+          <tr><td>手入力追加</td><td>「＋行追加」で空行を末尾に追加。追加後は最終行の入力欄にフォーカス</td></tr>
+          <tr><td>行削除</td><td>各行の「削除」ボタン（確認なし・即時削除）</td></tr>
+          <tr><td>CSV テンプレート出力</td><td>ヘッダーのみのCSVを保存</td></tr>
+          <tr><td>CSV 出力</td><td>現在の編集内容をCSVで保存</td></tr>
+          <tr><td>CSV 取込</td><td>ファイル選択→ブラウザ側でパース→画面に展開（FileReader）</td></tr>
+          <tr><td>更新保存</td><td><code>update_employees</code> で全件置換</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>テーブル列幅</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>列</th><th>minWidth</th></tr></thead>
+        <tbody>
+          <tr><td>社員番号</td><td>120px</td></tr>
+          <tr><td>社員名</td><td>120px</td></tr>
+          <tr><td>グループ</td><td>150px</td></tr>
+          <tr><td>グレード</td><td>自動</td></tr>
+          <tr><td>各月予算（×12）</td><td>75px（パディング縮小）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6-2. 帳票 (Report.tsx)</h3>
+    <p>期間（from〜to月）を指定し、担当別・グループ集計の2タブ表示。</p>
+    <ul>
+      <li>グループ小計行: 各グループの最終行に挿入（<code>subtotalRow</code> スタイル）</li>
+      <li>合計行: tfoot に全体合計を表示</li>
+      <li>達成率色分け: ≥100% → 緑（<code>rateHigh</code>）、&lt;80% → 赤（<code>rateLow</code>）</li>
+      <li>from ≠ to の場合は「{from}~{to}月〇〇」と表示</li>
+    </ul>
+  </section>
+
+  <!-- 7. データフロー図 -->
+  <section id="sec7">
+    <h2>7. データフロー図</h2>
+
+    <h3>受注 CSV インポート</h3>
+    <pre><code>ユーザー
+  │ ファイル選択 (tauri-plugin-dialog)
+  ▼
+DataImport.tsx
+  │ invoke("preview_csv", { path })
+  ▼
+csv_import_command::preview_csv
+  ▼
+csv_import_service::preview_csv
+  ├─ read_sjis_file()        SJIS → UTF-8 変換
+  ├─ parse_csv()
+  │   ├─ 契約日空欄 → skip
+  │   └─ validate_row()
+  │       ├─ parse_i64 (案件番号, 社員ID, 売上, 粗利)
+  │       ├─ require_str (担当者名, 案件名, 顧客名)
+  │       └─ date_to_month_int (契約日 → 会計月番号)
+  └─ Ok(Vec&lt;CsvPreviewRow&gt;) or Err(error_string)
+  │
+  ▼
+DataImport.tsx にプレビュー表示
+  │ invoke("import_orders", { path })
+  ▼
+csv_import_service::import_orders
+  └─ order_repository::upsert_orders
+      └─ INSERT OR REPLACE INTO orders (トランザクション)</code></pre>
+
+    <h3>帳票表示</h3>
+    <pre><code>Report.tsx
+  │ invoke("get_report", { from: 4, to: 6 })
+  ▼
+report_command::get_report
+  ▼
+report_service::get_report
+  │ nfrom = ((from-4+12)%12)+1  → 1
+  │ nto   = ((to  -4+12)%12)+1  → 3
+  ▼
+report_repository::get_report(pool, nfrom=1, nto=3)
+  │ employees LEFT JOIN orders(BETWEEN 1 AND 3)
+  │           LEFT JOIN budget(BETWEEN 1 AND 3)
+  │ GROUP BY employee → 集計値1セット
+  ▼
+Vec&lt;CsMemberOrderSummary&gt;
+  ▼
+Report.tsx でテーブル描画
+（groupByGroup → グループ行 + 小計行 → tfoot合計行）</code></pre>
+  </section>
+
+  <!-- 8. エラーハンドリング -->
+  <section id="sec8">
+    <h2>8. エラーハンドリング方針</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>レイヤー</th><th>方針</th></tr></thead>
+        <tbody>
+          <tr><td>repository</td><td>sqlx エラーを <code>.to_string()</code> で <code>Err(String)</code> に変換して上位へ伝播</td></tr>
+          <tr><td>service</td><td>repository の Err をそのまま伝播。ビジネスルール違反も <code>Err(String)</code></td></tr>
+          <tr><td>command</td><td><code>Result&lt;T, String&gt;</code> をそのまま Tauri に返す。Tauri が JSON シリアライズ</td></tr>
+          <tr><td>フロントエンド</td><td><code>invoke</code> の catch ブロックで <code>String(err)</code> を画面表示</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="doc-footer">CSOrder 設計書 — 最終更新: 2026-04-30</div>
+
+</main>
+</body>
+</html>
