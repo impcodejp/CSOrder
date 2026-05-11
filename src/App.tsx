@@ -3,15 +3,17 @@ import DataImport from "./components/DataImport";
 import OrderList from "./components/OrderList";
 import Report from "./components/Report";
 import EmployeeManagement from "./components/EmployeeManagement";
+import MonthEdit from "./components/MonthEdit";
 import styles from "./App.module.css";
 
-type Screen = "import" | "orders" | "report" | "employees";
+type Screen = "import" | "orders" | "report" | "employees" | "month";
 
 const NAV: { id: Screen; label: string }[] = [
   { id: "import",    label: "データ取込" },
   { id: "orders",    label: "受注一覧"   },
   { id: "report",    label: "帳票"       },
   { id: "employees", label: "社員管理"   },
+  { id: "month",     label: "営業月度修正" },
 ];
 
 export default function App() {
@@ -41,6 +43,7 @@ export default function App() {
         {screen === "orders"    && <OrderList />}
         {screen === "report"    && <Report />}
         {screen === "employees" && <EmployeeManagement />}
+        {screen === "month"     && <MonthEdit />}
       </main>
     </div>
   );

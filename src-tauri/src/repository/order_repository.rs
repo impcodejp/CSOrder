@@ -9,8 +9,8 @@ pub async fn get_orders(
     sqlx::query_as::<_, Order>(
         r#"SELECT id, cs_name, order_date, amount, gross_profit, project_name, client_name
            FROM orders
-           WHERE (? IS NULL OR cs_name = ?)
-             AND (? IS NULL OR client_name = ?)
+           WHERE (? IS NULL OR cs_name LIKE '%' || ? || '%')
+             AND (? IS NULL OR client_name LIKE '%' || ? || '%')
            ORDER BY order_date DESC, id DESC"#,
     )
     .bind(&cs_name)
@@ -55,4 +55,23 @@ pub async fn upsert_orders(pool: &SqlitePool, orders: &[NewOrder]) -> Result<usi
     Ok(orders.len())
 }
 
-
+pub async fn update_order_month_int(pool: &SqlitePool) -> Result<(), String> {
+    sqlx::query(
+        r#"
+            UPDATE orders
+            SET order_month_int = COALESCE(
+                (
+                    SELECT nmonth 
+                    FROM month_edit 
+                    WHERE orders.order_date <= month_edit.end_month_date 
+                    ORDER BY end_month_date ASC 
+                    LIMIT 1
+                ), 
+                999
+            );"#
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}

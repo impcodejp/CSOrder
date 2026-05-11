@@ -44,6 +44,8 @@ pub fn run() {
             command::csv_import_command::preview_csv,
             command::csv_import_command::validate_csv,
             command::csv_import_command::import_orders,
+            command::month_edit_command::get_month_edit,
+            command::month_edit_command::update_month_edit,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
