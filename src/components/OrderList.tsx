@@ -18,26 +18,84 @@ export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [staffFilter, setStaffFilter] = useState("");
   const [clientFilter, setClientFilter] = useState("");
+  const [dateFromFilter, setDateFromFilter] = useState("");
+  const [dateToFilter, setDateToFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
+
+    const formatDate = (value: string | null) => {
+      if (!value) return null;
+
+      const date = new Date(value);
+
+      // 不正な日付チェック
+      if (isNaN(date.getTime())) {
+        throw new Error(`日付形式が不正です: ${value}`);
+      }
+
+      return date;
+    };
+
     try {
+      // Date型へ変換
+      const fromDate = formatDate(dateFromFilter);
+      const toDate = formatDate(dateToFilter);
+
+      // 開始日 > 終了日 チェック
+      if (fromDate && toDate && fromDate > toDate) {
+        throw new Error("開始日は終了日以前を指定してください");
+      }
+
+      // API用文字列へ変換
+      const dateFromStr = fromDate
+        ? fromDate.toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })
+        : null;
+
+      const dateToStr = toDate
+        ? toDate.toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })
+        : null;
+
+      console.log("APIに渡すフィルタ条件:", {
+        csName: staffFilter || null,
+        clientName: clientFilter || null,
+        dateFrom: dateFromStr,
+        dateTo: dateToStr,
+      });
+
       const rows = await invoke<Order[]>("get_orders", {
         csName: staffFilter || null,
         clientName: clientFilter || null,
+        dateFrom: dateFromStr,
+        dateTo: dateToStr,
       });
+
       setOrders(rows);
+
     } catch (err) {
-      setError(String(err));
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
-  }, [staffFilter, clientFilter]);
+  }, [
+    staffFilter,
+    clientFilter,
+    dateFromFilter,
+    dateToFilter,
+  ]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); }, []);
 
   return (
     <div>
@@ -63,8 +121,24 @@ export default function OrderList() {
               placeholder="絞り込み..."
             />
           </label>
+          <label>
+            受注日(自)
+            <input
+              type="date"
+              value={dateFromFilter}
+              onChange={(e) => setDateFromFilter(e.target.value)}
+            />
+          </label>
+          <label>
+            受注日(至)
+            <input
+              type="date"
+              value={dateToFilter}
+              onChange={(e) => setDateToFilter(e.target.value)}
+            />
+          </label>
           <button className={`${ui.btn} ${ui.btnSecondary}`} onClick={load} disabled={loading}>
-            再読み込み
+            絞込
           </button>
         </div>
 

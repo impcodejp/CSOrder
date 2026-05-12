@@ -21,5 +21,6 @@ pub async fn import_orders(
     state: State<'_, AppState>,
     path: String,
 ) -> Result<usize, String> {
+    println!("Rust command received: {}", path);
     csv_import_service::import_orders(&state.db, &path).await
 }

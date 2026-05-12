@@ -5,6 +5,8 @@ pub async fn get_all_orders(
     pool: &sqlx::SqlitePool,
     cs_name: Option<String>,
     client_name: Option<String>,
+    date_from: Option<String>,
+    date_to: Option<String>,
 ) -> Result<Vec<Order>, String> {
-    order_repository::get_orders(pool, cs_name, client_name).await
+    order_repository::get_orders(pool, cs_name, client_name, date_from, date_to).await
 }

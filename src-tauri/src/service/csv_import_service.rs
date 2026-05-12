@@ -238,7 +238,7 @@ pub fn preview_csv(path: &str) -> Result<Vec<CsvPreviewRow>, String> {
     Ok(rows)
 }
 
-/// バリデーションのみ（DB 書き込みなし）。
+
 pub fn validate_csv(path: &str) -> Result<CsvValidationResult, String> {
     let utf8 = read_sjis_file(path)?;
     let (valid_rows, skipped, errors) = parse_csv(&utf8)?;
@@ -250,8 +250,7 @@ pub fn validate_csv(path: &str) -> Result<CsvValidationResult, String> {
     Ok(CsvValidationResult { total, skipped, valid_count, errors })
 }
 
-/// バリデーション OK の行を全件 UPSERT し、インポート件数を返す。
-/// エラーがあれば DB 書き込みなしで Err を返す。
+
 pub async fn import_orders(pool: &sqlx::SqlitePool, path: &str) -> Result<usize, String> {
     let utf8 = read_sjis_file(path)?;
     let (valid_rows, _, errors) = parse_csv(&utf8)?;
@@ -259,5 +258,6 @@ pub async fn import_orders(pool: &sqlx::SqlitePool, path: &str) -> Result<usize,
     if !errors.is_empty() {
         return Err(errors_to_string(&errors));
     }
+    println!("repositoryに渡す件数: {}", valid_rows.len());
     order_repository::upsert_orders(pool, &valid_rows).await
 }
