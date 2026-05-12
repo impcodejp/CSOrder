@@ -158,8 +158,8 @@ export default function OrderList() {
                     <th>受注者名</th>
                     <th>顧客名</th>
                     <th>案件名</th>
-                    <th className={ui.num}>金額（円）</th>
-                    <th className={ui.num}>粗利（円）</th>
+                    <th className={ui.num}>金額（千円）</th>
+                    <th className={ui.num}>粗利（千円）</th>
                   </tr>
                 </thead>
                 <tbody>

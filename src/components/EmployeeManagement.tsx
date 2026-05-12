@@ -53,8 +53,8 @@ const BUDGET_FIELDS = [
   "monthlyBudget9", "monthlyBudget10", "monthlyBudget11", "monthlyBudget12",
 ] as const satisfies (keyof Row)[];
 
-// CSV列順: 社員番号,社員名,グループ,グレード,4月予算〜3月予算
-const CSV_HEADER = ["社員番号", "社員名", "グループ", "グレード", ...MONTH_ORDER.map((m) => `${m}月予算`)].join(",");
+// CSV列順: CRM登録番号,社員名,グループ,グレード,4月予算〜3月予算
+const CSV_HEADER = ["CRM登録番号", "社員名", "グループ", "グレード", ...MONTH_ORDER.map((m) => `${m}月予算`)].join(",");
 
 let nextTempId = 0;
 
@@ -108,17 +108,17 @@ async function exportCSV(rows: Row[]) {
 function parseCSV(rawText: string): { rows: Row[]; error: string | null } {
   const text = rawText.replace(/^\uFEFF/, "");
   const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");
-  const dataLines = lines[0]?.split(",")[0].trim() === "社員番号" ? lines.slice(1) : lines;
+  const dataLines = lines[0]?.split(",")[0].trim() === "CRM登録番号" ? lines.slice(1) : lines;
   const rows: Row[] = [];
   for (let i = 0; i < dataLines.length; i++) {
     const cols = dataLines[i].split(",").map((c) => c.trim());
     if (cols.length < 4) {
-      return { rows: [], error: `${i + 1}行目: 列数が不足しています（社員番号,社員名,グループ,グレード[,4月予算〜3月予算]）` };
+      return { rows: [], error: `${i + 1}行目: 列数が不足しています（CRM登録番号,社員名,グループ,グレード[,4月予算〜3月予算]）` };
     }
     const [employeeCodeStr, name, group, grade, ...budgets] = cols;
     const employeeCode = Number(employeeCodeStr);
     if (!employeeCodeStr || isNaN(employeeCode) || employeeCode <= 0) {
-      return { rows: [], error: `${i + 1}行目: 社員番号は1以上の数値で入力してください` };
+      return { rows: [], error: `${i + 1}行目: CRM登録番号は1以上の数値で入力してください` };
     }
     if (!name || !group || !grade) {
       return { rows: [], error: `${i + 1}行目: 社員名・グループ・グレードは必須です` };
@@ -265,7 +265,7 @@ export default function EmployeeManagement() {
           <table style={{ minWidth: 1400 }}>
             <thead>
               <tr>
-                <th style={{ minWidth: 120 }}>社員番号</th>
+                <th style={{ minWidth: 120 }}>CRM登録番号</th>
                 <th style={{ minWidth: 120 }}>社員名</th>
                 <th style={{ minWidth: 150 }}>グループ</th>
                 <th>グレード</th>
